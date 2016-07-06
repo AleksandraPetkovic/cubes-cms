@@ -2,6 +2,33 @@
 
 class Admin_SessionController extends Zend_Controller_Action
 {
+    public function indexAction() {
+        //proverava da li je korisnik ulogovan
+        if (Zend_Auth::getInstance()->hasIdentity()){
+            //ulogovan je
+            
+            //redirect na admin_dashboard kontroler i index akciju
+            
+        }else{
+            //Ovde ide redirect na login stranu
+        
+        $redirector = $this->getHelper('Redirector');
+        $redirector instanceof Zend_Controller_Action_Helper_Redirector;
+        
+        
+        $redirector->setExit(true)
+                ->gotoRoute(array(
+                    
+                    'controller' => 'admin_dashboard',
+                    'action'=> 'login',
+        
+                ), 'default', true);
+        }
+        
+        
+    }
+    
+    
     public function loginAction() {
         
         //disejblovanje layout-a
@@ -42,7 +69,7 @@ class Admin_SessionController extends Zend_Controller_Action
                    //po defaultu se smesta samo username,a ovako smestamo asocijativni niz tj row iz tabele
                    //Asocijativni niz $user ima kljuceve koji su nazivi kolona u tabeli cms_users
                    
-                   $user = $authAdapter->getResultRowObject();
+                   $user = (array)$authAdapter->getResultRowObject();
                    $auth->getStorage()->write($user);
                    
                    
@@ -69,31 +96,7 @@ class Admin_SessionController extends Zend_Controller_Action
        $this->view->systemMessages = $systemMessages;
         
     }
-    public function indexAction() {
-        //proverava da li je korisnik ulogovan
-        if (Zend_Auth::getInstance()->hasIdentity()){
-            //ulogovan je
-            
-            //redirect na admin_dashboard kontroler i index akciju
-            
-        }else{
-            //Ovde ide redirect na login stranu
-        
-        $redirector = $this->getHelper('Redirector');
-        $redirector instanceof Zend_Controller_Action_Helper_Redirector;
-        
-        
-        $redirector->setExit(true)
-                ->gotoRoute(array(
-                    
-                    'controller' => 'admin_dashboard',
-                    'action'=> 'login',
-        
-                ), 'default', true);
-        }
-        
-        
-    }
+    
     
     
     public function logoutAction() {

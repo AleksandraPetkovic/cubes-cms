@@ -1,5 +1,9 @@
 <?php
 $this->headTitle('Members - Edit Member');
+
+$form = $this->form;
+
+$form->setElementDecorators(array('ViewHelper'));
 ?>
 
 <div class="page-header">
@@ -18,18 +22,36 @@ $this->headTitle('Members - Edit Member');
                 </div>
             </div>
             <div class="panel-body">
-                <form class="form-horizontal">
+                <form class="form-horizontal" method="post" action="">
+                    <input type="hidden" name="task" value="update">
                     <fieldset>
 
                         <!-- Form Name -->
-                        <legend>Edit Member</legend>
+                        <legend>Edit Member - <?php echo $this->escape($this->member['first_name'] . ' ' . $this->member['last_name']);?></legend>
 
                         <!-- Text input-->
                         <div class="form-group">
                             <label class="col-md-4 control-label" for="first_name">First Name</label>  
                             <div class="col-md-4">
-                                <input id="first_name" name="first_name" placeholder="enter member's first name" class="form-control input-md" required="" type="text">
+                                <?php
+                                echo $form->getElement('first_name')->setAttribs(array(
+                                    'class' => 'form-control input-md',
+                                    'placeholder' => "enter member\'s first name", 
+                                    'id' => "first_name",
+                                    'required' => 'required'
+                                ));
+                                ?>
                                 <span class="help-block">min 3 max 255 characters</span>  
+                            </div>
+                            <div class="col-md-4">
+                                <?php if ($form->getElement('first_name')->hasErrors()) { ?>
+                                    <div class="has-error">
+                                        <?php foreach ($form->getElement('first_name')->getMessages() as $message) { ?>
+                                            <p class="help-block"><?php echo $this->escape($message); ?></p>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
+
                             </div>
                         </div>
 
@@ -37,8 +59,26 @@ $this->headTitle('Members - Edit Member');
                         <div class="form-group">
                             <label class="col-md-4 control-label" for="last_name">Last Name</label>  
                             <div class="col-md-4">
-                                <input id="last_name" name="last_name" placeholder="enter member's last name" class="form-control input-md" required="" type="text">
+                                <?php
+                                echo $form->getElement('last_name')->setAttribs(array(
+                                    'class' => 'form-control input-md',
+                                    'placeholder' => 'enter member\'s last name',
+                                    'id' => 'last_name',
+                                    'required' => 'required', 
+                                ));
+                                ?>
+
                                 <span class="help-block">min 3 max 255 characters</span>  
+                            </div>
+                            <div class="col-md-4">
+                                <?php if ($form->getElement('last_name')->hasErrors()) {?>
+                                <div class="has-error">
+                                        <?php foreach ($form->getElement('last_name')->getMessages() as $message) { ?>
+                                            <p class="help-block"><?php echo $this->escape($message); ?></p>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
+
                             </div>
                         </div>
 
@@ -46,8 +86,27 @@ $this->headTitle('Members - Edit Member');
                         <div class="form-group">
                             <label class="col-md-4 control-label" for="email">Email</label>  
                             <div class="col-md-4">
-                                <input id="email" name="email" placeholder="enter member's email" class="form-control input-md" required="" type="text">
-                                <span class="help-block">user@domain</span>  
+                                <?php
+                                echo $form->getElement('email')->setAttribs(array(
+                                    'class' => 'form-control input-md',
+                                    'placeholder' => 'enter member\'s email',
+                                    'id' => 'email',
+                                    'required' => 'required', 
+                                    
+                                ));
+                                ?>
+                                <span class="help-block">username@domain</span>  
+                            </div>
+                            <div class="col-md-4">
+                                
+                                <?php if ($form->getElement('email')->hasErrors()) { ?>
+                                    <div class="has-error">
+                                        <?php foreach ($form->getElement('email')->getMessages() as $message) { ?>
+                                            <p class="help-block"><?php echo $this->escape($message); ?></p>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
+
                             </div>
                         </div>
 
@@ -55,25 +114,60 @@ $this->headTitle('Members - Edit Member');
                         <div class="form-group">
                             <label class="col-md-4 control-label" for="work_title">Work Title</label>  
                             <div class="col-md-4">
-                                <input id="work_title" name="work_title" placeholder="enter member's work title" class="form-control input-md" type="text">
-                                <span class="help-block">min 3 max 255 characters</span>  
+                                <?php
+                                echo $form->getElement('work_title')->setAttribs(array(
+                                    'class' => 'form-control input-md',
+                                    'placeholder' => 'enter member\'s work_title',
+                                    'id' => 'work_title',
+                                    
+                                ));
+                                ?>
+                                
+                                <span class="help-block">ex. "senior web developer"</span>  
+                            </div>
+                            <div class="col-md-4">
+                                <?php if ($form->getElement('work_title')->hasErrors()) { ?>
+                                    <div class="has-error">
+                                        <?php foreach ($form->getElement('work_title')->getMessages() as $message) { ?>
+                                            <p class="help-block"><?php echo $this->escape($message); ?></p>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
                             </div>
                         </div>
 
                         <!-- Textarea -->
                         <div class="form-group">
                             <label class="col-md-4 control-label" for="resume">Resume</label>
-                            <div class="col-md-4">                     
-                                <textarea class="form-control" id="resume" name="resume"></textarea>
+                            <div class="col-md-4">  
+                                <?php
+                                echo $form->getElement('resume')->setAttribs(array(
+                                    'class' => 'form-control',
+                                    'id' => 'resume',
+                                    'rows' => 12,
+                                ));
+                                ?>
+                                
+                            </div>
+                            <div class="col-md-4">
+                                <?php if ($form->getElement('resume')->hasErrors()) { ?>
+                                    <div class="has-error">
+                                        <?php foreach ($form->getElement('resume')->getMessages() as $message) { ?>
+                                            <p class="help-block"><?php echo $this->escape($message); ?></p>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
                             </div>
                         </div>
 
                         <!-- Button (Double) -->
-                        <div class="form-group">
-                            <label class="col-md-4 control-label" for="button1id"></label>
-                            <div class="col-md-8">
-                                <button id="button1id" name="button1id" class="btn btn-default">Cancel</button>
-                                <button id="button2id" name="button2id" class="btn btn-success">Save</button>
+                        <div class="form-group ">
+                            <label class="col-md-4 control-label" for="new_member_cancel"></label>
+                            <div class="col-md-4 text-right">
+                                <a
+                                    href="<?php echo $this->url(array('controller' => 'admin_members', 'action' => 'index'), 'default', true);?>"
+                                    id="new_member_cancel" name="new_member_cancel" class="btn btn-default">Cancel</a>
+                                <button type="submit" name="new_member_submit" class="btn btn-success">Save</button>
                             </div>
                         </div>
 
