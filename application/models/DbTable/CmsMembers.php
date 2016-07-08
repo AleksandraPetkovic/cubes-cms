@@ -29,5 +29,29 @@ class Application_Model_DbTable_CmsMembers extends Zend_Db_Table_Abstract
            return null;
        }
     }
+    
+    
+    
+    public function updateMember($id, $member) {
+        //proverava da li je setovan id 
+        if(isset($member['id'])){
+            //Forbid changing user id
+            unset($member['id']);
+        }
+        
+        $this->update($member, 'id = ' .$id);
+    }
+    
+    /**
+     * 
+     * @param array $member Associative array with keys as column names and values as column new values
+     * @return int The ID of new member (autoincrement)
+     */
+    public function insertMember($member){
+        //fetch order number for new member
+        $id = $this->insert($member);
+        
+        return $id;
+    }
 }
 

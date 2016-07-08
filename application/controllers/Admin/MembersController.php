@@ -63,7 +63,7 @@ class Admin_MembersController extends Zend_Controller_Action {
                 $cmsMembersTable = new Application_Model_DbTable_CmsMembers();
 
 
-                $cmsMembersTable->insert($formData);
+                $cmsMembersTable->insertMember($formData);
 
 
 
@@ -138,7 +138,7 @@ class Admin_MembersController extends Zend_Controller_Action {
                 $formData = $form->getValues();
 
                 //Radimo update postojeceg zapisa u tabeli
-                $cmsMembersTable->update($formData, 'id = ' . $member['id']);
+                $cmsMembersTable->updateMember($member['id'], $formData);
 
 
 

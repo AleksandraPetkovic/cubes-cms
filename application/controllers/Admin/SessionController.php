@@ -70,6 +70,7 @@ class Admin_SessionController extends Zend_Controller_Action
                    //Asocijativni niz $user ima kljuceve koji su nazivi kolona u tabeli cms_users
                    
                    $user = (array)$authAdapter->getResultRowObject();
+                   //kod za upisivanje row-ova u sesiju
                    $auth->getStorage()->write($user);
                    
                    
