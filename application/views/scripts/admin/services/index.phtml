@@ -37,7 +37,7 @@ $this->headTitle('Services');
                     <tbody>
                         <?php
                         foreach ($this->services as $service) {
-                            if ($service['status'] == Application_Model_DbTable_CmsMembers::STATUS_DISABLED) {
+                            if ($service['status'] == Application_Model_DbTable_CmsServices::STATUS_DISABLED) {
                                 ?>
                                 <tr class="danger">
                                     <td class="text-center"><span><i class="<?php echo $this->escape($service['icon']); ?>"></i></span></td>
