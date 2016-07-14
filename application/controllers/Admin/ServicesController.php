@@ -1,7 +1,7 @@
 <?php
 
-class Admin_ServicesController extends Zend_Controller_Action
-{
+class Admin_ServicesController extends Zend_Controller_Action {
+
     public function indexAction() {
 
         $flashMessenger = $this->getHelper('FlashMessenger');
@@ -71,7 +71,7 @@ class Admin_ServicesController extends Zend_Controller_Action
                 //set system message
                 //ovde redjamo sistemske poruke
                 $flashMessenger->addMessage('Service has beeen saved', 'success');
-                
+
                 //redirect to same or another page
                 $redirector = $this->getHelper('Redirector');
                 $redirector->setExit(true)
@@ -115,7 +115,7 @@ class Admin_ServicesController extends Zend_Controller_Action
             'success' => $flashMessenger->getMessages('success'),
             'errors' => $flashMessenger->getMessages('errors'),
         );
-           //forma sluzi za filtriranje i validaciju polja
+        //forma sluzi za filtriranje i validaciju polja
         $form = new Application_Form_Admin_ServiceAdd();
 
         //default form data
@@ -144,7 +144,7 @@ class Admin_ServicesController extends Zend_Controller_Action
                 //set system message
                 //ovde redjamo sistemske poruke
                 $flashMessenger->addMessage('Service has beeen updated', 'success');
-                
+
                 //redirect to same or another page
                 $redirector = $this->getHelper('Redirector');
                 $redirector->setExit(true)
@@ -160,10 +160,201 @@ class Admin_ServicesController extends Zend_Controller_Action
 
         $this->view->systemMessages = $systemMessages;
         $this->view->form = $form;
-        
+
 
         $this->view->service = $service;
     }
 
-}
+    public function deleteAction() {
 
+        $request = $this->getRequest();
+
+        if (!$request->isPost() || $request->isPost('task') != 'delete') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_services',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+
+
+                //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Zend_Controller_Router_Exception('Invalid service id: ' . $id);
+            }
+
+            $cmsServiceTable = new Application_Model_DbTable_CmsServices();
+
+            $service = $cmsServiceTable->getServiceById($id);
+
+
+            if (empty($service)) {
+
+                throw new Zend_Controller_Router_Exception('No service is found with id: ' . $id, 'errors');
+            }
+
+            $cmsServiceTable->deleteService($id);
+
+
+            $flashMessenger->addMessage('Service ' . $service['title'] . ' has been deleted', 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_services',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_services',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+    }
+
+    public function disableAction() {
+
+        $request = $this->getRequest();
+
+        if (!$request->isPost() || $request->isPost('task') != 'disable') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_services',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+
+
+                //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Zend_Controller_Router_Exception('Invalid service id: ' . $id);
+            }
+
+            $cmsServiceTable = new Application_Model_DbTable_CmsServices();
+
+            $service = $cmsServiceTable->getServiceById($id);
+
+
+            if (empty($service)) {
+
+                throw new Zend_Controller_Router_Exception('No service is found with id: ' . $id, 'errors');
+            }
+
+            $cmsServiceTable->disableService($id);
+
+
+            $flashMessenger->addMessage('Service ' . $service['title'] . ' has been disabled', 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_services',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_services',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+    }
+
+    public function enableAction() {
+
+        $request = $this->getRequest();
+
+        if (!$request->isPost() || $request->isPost('task') != 'enable') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_services',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+
+
+                //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Zend_Controller_Router_Exception('Invalid service id: ' . $id);
+            }
+
+            $cmsServiceTable = new Application_Model_DbTable_CmsServices();
+
+            $service = $cmsServiceTable->getServiceById($id);
+
+
+            if (empty($service)) {
+
+                throw new Zend_Controller_Router_Exception('No service is found with id: ' . $id, 'errors');
+            }
+
+            $cmsServiceTable->enableService($id);
+
+
+            $flashMessenger->addMessage('Service ' . $service['title'] . ' has been enabled', 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_services',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_services',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+    }
+
+}
