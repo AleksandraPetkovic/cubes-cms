@@ -16,6 +16,8 @@ $this->headTitle('Members');
         <div class="panel panel-default">
             <div class="panel-heading text-right">
                 <div class="btn-group" role="group" aria-label="...">
+                    <bytton data-action="save-order" style="display: none;" class="btn btn-success"><i class="glyphicon glyphicon-save"></i>Save Order</bytton>
+                    <bytton data-action="toogle-sort" class="btn btn-default"><i class="glyphicon glyphicon-list"></i>Change Order</bytton>
                     <a 
                         href="<?php echo $this->url(array('controller' => 'admin_members', 'action' => 'add'), 'default', true); ?>" type="button" 
                         class="btn btn-default"
@@ -26,6 +28,7 @@ $this->headTitle('Members');
                 <table id="rows-table" class="table table-striped table-hover">
                     <thead>
                         <tr>
+                            <th></th>
                             <th class="text-center">Img</th>
                             <th class="text-center">Status</th>
                             <th>First Name</th>
@@ -40,7 +43,8 @@ $this->headTitle('Members');
                         foreach ($this->members as $member) {
                             if ($member['status'] == Application_Model_DbTable_CmsMembers::STATUS_DISABLED) {
                                 ?>
-                                <tr class="danger">
+                                <tr class="danger" data-member-id="<?php echo $this->escape($member['id']); ?>">
+                                    <td class="text-center"><i data-action="sort" class="glyphicon glyphicon-list" style="display: none; cursor: pointer;"></i></td>
                                     <td class="text-center"><img style="max-height: 24px;" src="<?php echo $this->memberImgUrl($member); ?>"></td>
                                     <td class="text-center"><span class="badge alert-danger" title="disabled"><i class="glyphicon glyphicon-remove"></i></span></td>
                                     <td><?php echo $this->escape($member['first_name']); ?></td>
@@ -56,8 +60,8 @@ $this->headTitle('Members');
                                             <a 
                                                 href="<?php echo $this->url(array('controller' => 'admin_members', 'action' => 'edit', 'id' => $member['id']), 'default', true); ?>" 
                                                 type="button" class="btn btn-default" title="edit"><i class="glyphicon glyphicon-pencil"></i></a>
-                                            <button data-memberId="<?php echo $this->escape($member['id']); ?>" data-action="enable" type="button" class="btn btn-default" title="enable"><i class="glyphicon glyphicon-ok"></i></button>
-                                            <button data-memberId="<?php echo $this->escape($member['id']); ?>" data-action="delete" type="button" class="btn btn-default" title="delete"><i class="glyphicon glyphicon-trash"></i></button>
+                                            <button data-member-id="<?php echo $this->escape($member['id']); ?>" data-action="enable" type="button" class="btn btn-default" title="enable"><i class="glyphicon glyphicon-ok"></i></button>
+                                            <button data-member-id="<?php echo $this->escape($member['id']); ?>" data-action="delete" type="button" class="btn btn-default" title="delete"><i class="glyphicon glyphicon-trash"></i></button>
 
                                         </div>
                                     </td>
@@ -65,7 +69,8 @@ $this->headTitle('Members');
                                 <?php
                             } else {
                                 ?> 
-                                <tr>
+                                <tr data-member-id="<?php echo $this->escape($member['id']); ?>">
+                                    <td class="text-center"><i data-action="sort" class="glyphicon glyphicon-list" style="display: none; cursor: pointer;"></i></td>
                                     <td class="text-center"><img style="max-height: 24px;" src="<?php echo $this->memberImgUrl($member); ?>"></td>
                                     <td class="text-center"><span class="badge alert-success" title="enabled"><i class="glyphicon glyphicon-ok"></i></span></td>
                                     <td><?php echo $this->escape($member['first_name']); ?></td>
@@ -81,8 +86,8 @@ $this->headTitle('Members');
                                             <a 
                                                 href="<?php echo $this->url(array('controller' => 'admin_members', 'action' => 'edit', 'id' => $member['id']), 'default', true); ?>" 
                                                 type="button" class="btn btn-default" title="edit"><i class="glyphicon glyphicon-pencil"></i></a>
-                                            <button data-memberId="<?php echo $this->escape($member['id']); ?>" data-action="disable" type="button" class="btn btn-default" title="disable"><i class="glyphicon glyphicon-remove"></i></button>
-                                            <button data-memberId="<?php echo $this->escape($member['id']); ?>" data-action="delete" type="button" class="btn btn-default" title="delete"><i class="glyphicon glyphicon-trash"></i></button>
+                                            <button data-member-id="<?php echo $this->escape($member['id']); ?>" data-action="disable" type="button" class="btn btn-default" title="disable"><i class="glyphicon glyphicon-remove"></i></button>
+                                            <button data-member-id="<?php echo $this->escape($member['id']); ?>" data-action="delete" type="button" class="btn btn-default" title="delete"><i class="glyphicon glyphicon-trash"></i></button>
 
                                         </div>
                                     </td>
@@ -168,30 +173,40 @@ $this->headTitle('Members');
 </form><!-- /.modal -->
 
 
+<form method="post" action="<?php echo $this->url(array('controller' => 'admin_members', 'action' => 'updateOrder'), 'default', true);?>" style="display: none;" id="save-order-form">
+    <input type="hidden" name="task" value="saveOrder">
+    <input type="hidden" name="sorted_ids" value="">
+    
+</form>
+
+<?php
+$this->headLink()->appendStylesheet($this->baseUrl('/admin/bower_components/jquery-ui-1.12.0/jquery-ui.min.css'));
+$this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/jquery-ui-1.12.0/jquery-ui.min.js'));
+?>
+
 <script>
 <?php $this->inlineScript()->captureStart(); ?>
+
     //delete
     $('#rows-table').on('click', '[data-action="delete"]', function (e) {
 
         e.preventDefault();
-
         e.stopPropagation();
 
         //calculate target element //ovako radi u svim browserima
         var target = $(this).is('[data-action="delete"]') ? $(this) : $(this).closest('[data-action="delete"]');
 
-
-        //attr je za bilo koji atribut
-        var memberId = target.attr('data-memberId');
-
+        //attr je za bilo koji atribut/ href/ src/
+        var memberId = target.attr('data-member-id');
 
         //ovo vadi samo data atribute// getdata-attributes
-        //var memberId = target.data('memberId');
+        var memberId = target.data('memberId');
 
         //alert(memberId);
 
         //set values for input field with name "id"
         $('#delete-warning-dialog').find('input[name="id"]').val(memberId);
+
         $('#delete-warning-dialog').modal('show');
 
     });
@@ -208,7 +223,7 @@ $this->headTitle('Members');
         var target = $(this).is('[data-action="disable"]') ? $(this) : $(this).closest('[data-action="disable"]');
 
         //attr je za bilo koji atribut
-        var memberId = target.attr('data-memberId');
+        var memberId = target.attr('data-member-id');
 
         //ovo vadi samo data atribute// getdata-attributes
         //var memberId = target.data('memberId');
@@ -226,20 +241,97 @@ $this->headTitle('Members');
     $('#rows-table').on('click', '[data-action="enable"]', function (e) {
 
         e.preventDefault();
-
         e.stopPropagation();
 
         //calculate target element //ovako radi u svim browserima
         var target = $(this).is('[data-action="enable"]') ? $(this) : $(this).closest('[data-action="enable"]');
 
         //attr je za bilo koji atribut
-        var memberId = target.attr('data-memberId');
+        var memberId = target.attr('data-member-id');
 
         //set values for input field with name "id"
         $('#enable-warning-dialog').find('input[name="id"]').val(memberId);
         $('#enable-warning-dialog').modal('show');
 
     });
+
+    //sortiranje
+    $('[data-action="toogle-sort"]').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var target = $(this).is('[data-action="toogle-sort"]') ? $(this) : $(this).closest('[data-action="toogle-sort"]');
+        
+        // > vece se osiguravamo da je bas od te tabele tbody
+        var sortableTbody = $('#rows-table > tbody')
+        
+        
+                
+        if (target.hasClass('active')) {
+
+            target.removeClass('active');
+            
+            target.html('<i class="glyphicon glyphicon-list"></i> Change order');
+            
+            //destroy sortable functionallity
+            sortableTbody.sortable('destroy');
+            
+            //restore old html into tbody
+            sortableTbody.html(sortableTbody.data('oldHtml'));
+            
+            //kada unistimo treba da sakrijemo//show "handle" for sorting, the icon in first column
+            sortableTbody.find('[data-action="sort"]').hide();
+            
+            //hide "Save Order" button
+            $('[data-action="save-order"]').hide();
+            
+        } else {
+
+            target.addClass('active');
+            
+            //method html sets or gets html inside selected element
+            target.html('<i class="glyphicon glyphicon-remove"></i> Cancel');
+
+            //save tbody html before sorting under key "oldHtml" into its data
+            sortableTbody.data('oldHtml', sortableTbody.html());
+            
+            //initialize sortable functionallity
+            sortableTbody.sortable({
+                handle: '[data-action="sort"]'
+            });
+            
+            //show "handle" for sorting, the icon in first column
+            sortableTbody.find('[data-action="sort"]').show();
+            
+            //hide "Save Order" button
+            $('[data-action="save-order"]').show();
+        }
+    });
+    
+    //
+    $('[data-action="save-order"]').on('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var memberSortIds = $('#rows-table > tbody').sortable('toArray', {
+            attribute: 'data-member-id'
+        });
+    
+    var saveOrderForm = $('#save-order-form');
+    
+    //find element with name "sorted_ids" in save order form and set its value
+    //with string in which are sorted ids separated with coma (,)
+    ////ex. "12,3,8,10,11,6,2,1,9,7,5,4"
+    saveOrderForm.find('[name="sorted_ids"]').val(memberSortIds.join(','));
+    
+    //da vidimo sta smo dobili u nizu :)
+    //alert(memberSortIds);
+    
+    //manually submit form by triggering "submit" event
+    saveOrderForm.trigger('submit');
+    });
+
+    
 
 
 <?php $this->inlineScript()->captureEnd(); ?>
