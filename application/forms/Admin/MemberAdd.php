@@ -41,6 +41,27 @@ class Application_Form_Admin_MemberAdd extends Zend_Form
                 ->setRequired(false);
         $this->addElement($resume);
         
+        
+        $memberPhoto = new Zend_Form_Element_File('member_photo');
+        //ogranicava koliko fajlova sme da se okaci to znaci ovo 1, znaci sme max 1 fajl da se upload-uje
+        //true znaci ako ima vise od jednog fajla prekida se izvrsavanje koda i ne ide dalje na MimeType
+        //a da je false onda kod nastavlja da se izvrsava
+        $memberPhoto->addValidator('Count', true, 1)
+                ->addValidator('MimeType', true, array('image/jpeg', 'image/gif', 'image/png'))
+                ->addValidator('ImageSize', false, array(
+                    'minwidth' => 150,
+                    'minheight' => 150,
+                    'maxwidth' => 2000,
+                    'maxheight' => 2000
+                    ))
+                ->addValidator('Size', false, array(
+                    'max' => '10MB'
+                    ))
+                //disable move file to destination when calling method getValues
+                ->setValueDisabled(true)
+                ->setRequired(false);
+        
+        $this->addElement($memberPhoto);
     }
 
 }
