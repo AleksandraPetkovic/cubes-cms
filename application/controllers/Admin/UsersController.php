@@ -13,7 +13,24 @@ class Admin_UsersController extends Zend_Controller_Action
         
         $cmsUsersDbTable = new Application_Model_DbTable_CmsUsers();
         
-        $users = $cmsUsersDbTable->fetchAll()->toArray();
+        //dobijamo ulogovanog user-a
+        $loggedInUser = Zend_Auth::getInstance()->getIdentity();
+        
+        $users = $cmsUsersDbTable->search(array(
+            'filters' =>array (
+                //bitno je da se ovaj tekst poklapa sa switch-om
+                //on ne mora celi da se poklapa
+                //'username_search' => 'vic',
+                //daje praznu tabelu jer ne postoji username alek
+                //'username' => 'alek'
+                'id_exclude' => $loggedInUser['id']
+            ),
+            'orders' => array (
+                'first_name' => 'ASC'
+            ),
+//            'limit' => 3,
+//            'page' => 2
+        ));
         
         $this->view->users = $users;
         $this->view->systemMessages = $systemMessages;
@@ -369,7 +386,7 @@ class Admin_UsersController extends Zend_Controller_Action
         
          $request = $this->getRequest();
         //ispituje se POST zahtev
-        if (!$request->isPost() || $request->isPost('task') != 'reset_password') {
+        if (!$request->isPost() || $request->isPost('task') != 'resetpassword') {
             //request is not post redirect to index page
             //redirect to same or another page
             $redirector = $this->getHelper('Redirector');
@@ -402,7 +419,7 @@ class Admin_UsersController extends Zend_Controller_Action
                 throw new Application_Model_Exception_InvalidInput('No user is found with id: ' . $id, 'errors');
             }
 
-            $cmsUsersTable->resetPassword($id);
+            $cmsUsersTable->resetUserPassword($id);
 
             $flashMessenger->addMessage('Password has been reset successfully for '. $user['first_name'] . ' ' . $user['last_name'], 'success');
             $redirector = $this->getHelper('Redirector');

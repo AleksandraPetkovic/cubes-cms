@@ -182,8 +182,16 @@ $this->headTitle('Users');
 </form><!-- /.modal -->
 
 
+<?php 
 
+$this->headLink()->appendStylesheet($this->baseUrl('/admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css" rel="stylesheet'));  
+$this->headLink()->appendStylesheet($this->baseUrl('/admin/bower_components/datatables-responsive/css/dataTables.responsive.css" rel="stylesheet'));
 
+$this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/datatables/media/js/jquery.dataTables.min.js'));
+$this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js'));
+$this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/datatables-responsive/js/dataTables.responsive.js'));
+?>      
+    
 <script>
 <?php $this->inlineScript()->captureStart(); ?>
 
@@ -274,6 +282,16 @@ $this->headTitle('Users');
 
     });
 
+    $('#rows-table').dataTable({
+        //prosledjujemo JS objekat
+        columnDefs: [
+            {targets: [0, 5], orderable: false, searchable: false}
+        ],
+        order: [
+            [2, 'asc']
+        ],
+        lengthMenu: [3, 5, 10, 20, 50, 100]
+    });
     
 <?php $this->inlineScript()->captureEnd(); ?>
 </script>    
