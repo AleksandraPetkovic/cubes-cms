@@ -174,4 +174,254 @@ class Admin_UsersController extends Zend_Controller_Action
 
         $this->view->user = $user;
     }
+    
+    
+    public function deleteAction() {
+
+        $request = $this->getRequest();
+
+        if (!$request->isPost() || $request->isPost('task') != 'delete') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+
+
+                //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Zend_Controller_Router_Exception('Invalid user id: ' . $id);
+            }
+
+            $cmsUsersTable = new Application_Model_DbTable_CmsMembers();
+
+            $user = $cmsUsersTable->getMemberById($id);
+
+
+            if (empty($user)) {
+
+                throw new Zend_Controller_Router_Exception('No user is found with id: ' . $id, 'errors');
+            }
+
+            $cmsUsersTable->deleteUser($id);
+
+
+            $flashMessenger->addMessage('User ' . $user['first_name'] . ' ' . $user['last_name'] . 'has been deleted', 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_members',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+    }
+
+    
+    public function disableAction() {
+
+        $request = $this->getRequest();
+
+        if (!$request->isPost() || $request->isPost('task') != 'disable') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+
+
+                //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Application_Model_Exception_InvalidInput('Invalid user id: ' . $id);
+            }
+
+            $cmsUsersTable = new Application_Model_DbTable_CmsUsers();
+
+            $user = $cmsUsersTable->getUserById($id);
+
+
+            if (empty($user)) {
+
+                throw new Zend_Controller_Router_Exception('No user is found with id: ' . $id, 'errors');
+            }
+
+            $cmsUsersTable->disableUser($id);
+
+            $flashMessenger->addMessage('User ' . $user['first_name'] . ' ' . $user['last_name'] . ' has been disabled', 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+    }
+
+    public function enableAction() {
+
+        $request = $this->getRequest();
+        //ispituje se POST zahtev
+        if (!$request->isPost() || $request->isPost('task') != 'enable') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+                //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Application_Model_Exception_InvalidInput('Invalid user id: ' . $id);
+            }
+
+            $cmsUsersTable = new Application_Model_DbTable_CmsUsers();
+            $user = $cmsUsersTable->getUserById($id);
+
+
+            if (empty($user)) {
+
+                throw new Application_Model_Exception_InvalidInput('No user is found with id: ' . $id, 'errors');
+            }
+
+            $cmsUsersTable->enableUser($id);
+
+            $flashMessenger->addMessage('User ' . $user['first_name'] . ' ' . $user['last_name'] . ' has been enabled', 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+    }
+    
+    
+    public function resetpasswordAction(){
+        
+         $request = $this->getRequest();
+        //ispituje se POST zahtev
+        if (!$request->isPost() || $request->isPost('task') != 'reset_password') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+                //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Application_Model_Exception_InvalidInput('Invalid user id: ' . $id);
+            }
+
+            $cmsUsersTable = new Application_Model_DbTable_CmsUsers();
+            $user = $cmsUsersTable->getUserById($id);
+
+
+            if (empty($user)) {
+
+                throw new Application_Model_Exception_InvalidInput('No user is found with id: ' . $id, 'errors');
+            }
+
+            $cmsUsersTable->resetPassword($id);
+
+            $flashMessenger->addMessage('Password has been reset successfully for '. $user['first_name'] . ' ' . $user['last_name'], 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_users',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+    }
 }
