@@ -270,7 +270,7 @@ class Application_Model_DbTable_CmsUsers extends Zend_Db_Table_Abstract {
                         $select->where('email LIKE ?', '%' . $value . '%');
                         break;
                     
-                    
+                    //iskljucivanje tog id-ja
                     case 'id_exclude':
                         
                         if (is_array($value)) {
