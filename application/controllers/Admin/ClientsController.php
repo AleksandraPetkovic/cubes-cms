@@ -1,6 +1,6 @@
 <?php
 
-class Admin_MembersController extends Zend_Controller_Action {
+class Admin_ClientsController extends Zend_Controller_Action {
 
     public function indexAction() {
 
@@ -12,25 +12,20 @@ class Admin_MembersController extends Zend_Controller_Action {
         );
 
         //prikaz svih member-a
-        $cmsMembersDbTable = new Application_Model_DbTable_CmsMembers();
-
+        $cmsClientsDbTable = new Application_Model_DbTable_CmsClients();
         //select je objekat klase Zend_Db_Select
-        $select = $cmsMembersDbTable->select();
-
+        $select = $cmsClientsDbTable->select();
         $select->order('order_number');
-
         //debug za  db select - vraca se sql upit
         //die($select->assemble());
+        $clients = $cmsClientsDbTable->fetchAll($select);
 
-        $members = $cmsMembersDbTable->fetchAll($select);
-
-        $this->view->members = $members;
+        $this->view->clients = $clients;
         $this->view->systemMessages = $systemMessages;
     }
 
     public function addAction() {
 
-        //
         $request = $this->getRequest();
 
         $flashMessenger = $this->getHelper('FlashMessenger');
@@ -40,64 +35,59 @@ class Admin_MembersController extends Zend_Controller_Action {
             'errors' => $flashMessenger->getMessages('errors'),
         );
 
-        $form = new Application_Form_Admin_MemberAdd();
+        $form = new Application_Form_Admin_ClientAdd();
 
         //default form data
         $form->populate(array(
         ));
-
-
 
         if ($request->isPost() && $request->getPost('task') === 'save') { //if se izvrsava ako je pokrenuta forma
             try {
 
                 //check form is valid
                 if (!$form->isValid($request->getPost())) { //ako su svi validatori prosli forma je validna
-                    throw new Application_Model_Exception_InvalidInput('Invalid data was sent for new member'); //trazimo gresku bacamo exception
+                    throw new Application_Model_Exception_InvalidInput('Invalid data was sent for new client'); //trazimo gresku bacamo exception
                 }
 
                 //get form data
                 $formData = $form->getValues();
 
                 //remove key member_photo from form data because there is no column 'member_photo' in cms_members
-                unset($formData['member_photo']);
+                unset($formData['client_photo']);
 
                 //Insertujemo novi zapis u tabelu
-                $cmsMembersTable = new Application_Model_DbTable_CmsMembers();
+                $cmsClientsTable = new Application_Model_DbTable_CmsClients();
 
 
                 //insert member returns ID of the new member //insertovanje u bazu
-                $memberId = $cmsMembersTable->insertMember($formData);
+                $clientId = $cmsClientsTable->insertClient($formData);
 
                 //da li je uloadovano, provera
-                if ($form->getElement('member_photo')->isUploaded()) {
+                if ($form->getElement('client_photo')->isUploaded()) {
                     //photo is uploaded
 
-                    $fileInfos = $form->getElement('member_photo')->getFileInfo('member_photo');
-                    $fileInfo = $fileInfos['member_photo'];
+                    $fileInfos = $form->getElement('client_photo')->getFileInfo('client_photo');
+                    $fileInfo = $fileInfos['client_photo'];
                     //isto kao prethodne dve linije gore
-                    //$fileInfos = $_FILES['member_photo']
+                    //$fileInfos = $_FILES['client_photo']
 
                     try {
                         //make je putanja do slike
                         //open uploaded photo in temporary directory
-                        $memberPhoto = Intervention\Image\ImageManagerStatic::make($fileInfo['tmp_name']);
-
-                        $memberPhoto->fit(150, 150);
-
+                        $clientPhoto = Intervention\Image\ImageManagerStatic::make($fileInfo['tmp_name']);
+                        $clientPhoto->fit(170, 70);
                         //kakvu god ekstenziju da ubacimo on je konvertuje u jpg// 
-                        $memberPhoto->save(PUBLIC_PATH . '/uploads/members/' . $memberId . '.jpg');
+                        $clientPhoto->save(PUBLIC_PATH . '/uploads/clients/' . $clientId . '.jpg');
                     } catch (Exception $ex) {
-                        $flashMessenger->addMessage('Member has beeen saved but error occured during image processing', 'success');
-
+                        $flashMessenger->addMessage('Client has beeen saved but error occured during image processing', 'success');
                         //redirect to same or another page
                         $redirector = $this->getHelper('Redirector');
                         $redirector->setExit(true)
                                 ->gotoRoute(array(
-                                    'controller' => 'admin_members',
+                                    'controller' => 'admin_clients',
                                     //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                                     'action' => 'index',
-                                    'id' => $memberId
+                                    'id' => $clientId
                                         ), 'default', true);
                     }
                 }
@@ -107,15 +97,13 @@ class Admin_MembersController extends Zend_Controller_Action {
                 //save to database etc
                 //set system message
                 //ovde redjamo sistemske poruke
-                $flashMessenger->addMessage('Member has beeen saved', 'success');
-                //ovo su primera dva dole da vidimo kako izgleda
-                //$flashMessenger->addMessage('Or not maybe something is wrong', 'errors');
-                //$flashMessenger->addMessage('success message 2', 'success');
+                $flashMessenger->addMessage('Client has beeen saved', 'success');
+                
                 //redirect to same or another page
                 $redirector = $this->getHelper('Redirector');
                 $redirector->setExit(true)
                         ->gotoRoute(array(
-                            'controller' => 'admin_members',
+                            'controller' => 'admin_clients',
                             //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                             'action' => 'index',
                                 ), 'default', true);
@@ -137,15 +125,15 @@ class Admin_MembersController extends Zend_Controller_Action {
 
         if ($id <= 0) {
             //prekida se izvrsavanje programa i prikazuje se "Page not found"
-            throw new Zend_Controller_Router_Exception('Invalid member id: ' . $id, 404);
+            throw new Zend_Controller_Router_Exception('Invalid client id: ' . $id, 404);
         }
 
-        $cmsMembersTable = new Application_Model_DbTable_CmsMembers();
+        $cmsClientsTable = new Application_Model_DbTable_CmsClients();
 
-        $member = $cmsMembersTable->getMemberById($id);
+        $client = $cmsClientsTable->getClientById($id);
 
-        if (empty($member)) {
-            throw new Zend_Controller_Router_Exception('No member is found with id: ' . $id, 404);
+        if (empty($client)) {
+            throw new Zend_Controller_Router_Exception('No client is found with id: ' . $id, 404);
         }
 
         $flashMessenger = $this->getHelper('FlashMessenger');
@@ -155,69 +143,59 @@ class Admin_MembersController extends Zend_Controller_Action {
             'errors' => $flashMessenger->getMessages('errors'),
         );
         //forma sluzi za filtriranje i validaciju polja
-        $form = new Application_Form_Admin_MemberEdit();
+        $form = new Application_Form_Admin_ClientEdit();
 
         //default form data
-        $form->populate($member);
-
-
+        $form->populate($client);
 
         if ($request->isPost() && $request->getPost('task') === 'update') { //if se izvrsava ako je pokrenuta forma
             try {
 
                 //check form is valid
                 if (!$form->isValid($request->getPost())) { //ako su svi validatori prosli forma je validna
-                    throw new Application_Model_Exception_InvalidInput('Invalid data was sent for member'); //trazimo gresku bacamo exception
+                    throw new Application_Model_Exception_InvalidInput('Invalid data was sent for client'); //trazimo gresku bacamo exception
                 }
 
                 //get form data
                 $formData = $form->getValues();
-                unset($formData['member_photo']);
+                unset($formData['client_photo']);
 
-                if ($form->getElement('member_photo')->isUploaded()) {
+                if ($form->getElement('client_photo')->isUploaded()) {
                     //photo is uploaded
 
-                    $fileInfos = $form->getElement('member_photo')->getFileInfo('member_photo');
-                    $fileInfo = $fileInfos['member_photo'];
+                    $fileInfos = $form->getElement('client_photo')->getFileInfo('client_photo');
+                    $fileInfo = $fileInfos['client_photo'];
                     //isto kao prethodne dve linije gore
                     //$fileInfos = $_FILES['member_photo']
 
                     try {
                         //make je putanja do slike
                         //open uploaded photo in temporary directory
-                        $memberPhoto = Intervention\Image\ImageManagerStatic::make($fileInfo['tmp_name']);
+                        $clientPhoto = Intervention\Image\ImageManagerStatic::make($fileInfo['tmp_name']);
 
-                        $memberPhoto->fit(150, 150);
+                        $clientPhoto->fit(170, 70);
 
                         //kakvu god ekstenziju da ubacimo on je konvertuje u jpg// 
-                        $memberPhoto->save(PUBLIC_PATH . '/uploads/members/' . $member['id'] . '.jpg');
+                        $clientPhoto->save(PUBLIC_PATH . '/uploads/clients/' . $client['id'] . '.jpg');
                     } catch (Exception $ex) {
                         //ne redirektujemo na neku drugu stranu nego ostajemo na toj strani 
                         throw new Application_Model_Exception_InvalidInput('Error occured during image processing');
                     }
                 }
 
-
-
-
                 //Radimo update postojeceg zapisa u tabeli
-                $cmsMembersTable->updateMember($member['id'], $formData);
-
-
+                $cmsClientsTable->updateClient($client['id'], $formData);
 
                 // do actual task
                 //save to database etc
                 //set system message
                 //ovde redjamo sistemske poruke
-                $flashMessenger->addMessage('Member has beeen updated', 'success');
-                //ovo su primera dva dole da vidimo kako izgleda
-                //$flashMessenger->addMessage('Or not maybe something is wrong', 'errors');
-                //$flashMessenger->addMessage('success message 2', 'success');
+                $flashMessenger->addMessage('Client has beeen updated', 'success');
                 //redirect to same or another page
                 $redirector = $this->getHelper('Redirector');
                 $redirector->setExit(true)
                         ->gotoRoute(array(
-                            'controller' => 'admin_members',
+                            'controller' => 'admin_clients',
                             //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                             'action' => 'index',
                                 ), 'default', true);
@@ -230,7 +208,7 @@ class Admin_MembersController extends Zend_Controller_Action {
         $this->view->form = $form;
 
 
-        $this->view->member = $member;
+        $this->view->client = $client;
     }
 
     public function deleteAction() {
@@ -243,7 +221,7 @@ class Admin_MembersController extends Zend_Controller_Action {
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -258,29 +236,28 @@ class Admin_MembersController extends Zend_Controller_Action {
 
             if ($id <= 0) {
 
-
                 //prekida se izvrsavanje programa i prikazuje se "Page not found"
-                throw new Zend_Controller_Router_Exception('Invalid member id: ' . $id);
+                throw new Zend_Controller_Router_Exception('Invalid client id: ' . $id);
             }
 
-            $cmsMembersTable = new Application_Model_DbTable_CmsMembers();
+            $cmsClientsTable = new Application_Model_DbTable_CmsClients();
 
-            $member = $cmsMembersTable->getMemberById($id);
+            $client = $cmsClientsTable->getClientById($id);
 
 
-            if (empty($member)) {
+            if (empty($client)) {
 
-                throw new Zend_Controller_Router_Exception('No member is found with id: ' . $id, 'errors');
+                throw new Zend_Controller_Router_Exception('No client is found with id: ' . $id, 'errors');
             }
 
-            $cmsMembersTable->deleteMember($id);
+            $cmsClientsTable->deleteClient($id);
 
 
-            $flashMessenger->addMessage('Member ' . $member['first_name'] . ' ' . $member['last_name'] . 'has been deleted', 'success');
+            $flashMessenger->addMessage('Client ' . $client['first_name'] . ' ' . $client['last_name'] . 'has been deleted', 'success');
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -290,7 +267,7 @@ class Admin_MembersController extends Zend_Controller_Action {
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -307,7 +284,7 @@ class Admin_MembersController extends Zend_Controller_Action {
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -322,29 +299,27 @@ class Admin_MembersController extends Zend_Controller_Action {
 
             if ($id <= 0) {
 
-
                 //prekida se izvrsavanje programa i prikazuje se "Page not found"
-                throw new Zend_Controller_Router_Exception('Invalid member id: ' . $id);
+                throw new Zend_Controller_Router_Exception('Invalid client id: ' . $id);
             }
 
-            $cmsMembersTable = new Application_Model_DbTable_CmsMembers();
+            $cmsClientsTable = new Application_Model_DbTable_CmsClients();
 
-            $member = $cmsMembersTable->getMemberById($id);
+            $client = $cmsClientsTable->getClientById($id);
 
 
-            if (empty($member)) {
+            if (empty($client)) {
 
-                throw new Zend_Controller_Router_Exception('No member is found with id: ' . $id, 'errors');
+                throw new Zend_Controller_Router_Exception('No client is found with id: ' . $id, 'errors');
             }
 
-            $cmsMembersTable->disableMember($id);
+            $cmsClientsTable->disableClient($id);
 
-
-            $flashMessenger->addMessage('Member ' . $member['first_name'] . ' ' . $member['last_name'] . 'has been disabled', 'success');
+            $flashMessenger->addMessage('Client ' . $client['first_name'] . ' ' . $client['last_name'] . 'has been disabled', 'success');
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -354,7 +329,7 @@ class Admin_MembersController extends Zend_Controller_Action {
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -371,7 +346,7 @@ class Admin_MembersController extends Zend_Controller_Action {
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -386,29 +361,27 @@ class Admin_MembersController extends Zend_Controller_Action {
 
             if ($id <= 0) {
 
-
                 //prekida se izvrsavanje programa i prikazuje se "Page not found"
-                throw new Zend_Controller_Router_Exception('Invalid member id: ' . $id);
+                throw new Zend_Controller_Router_Exception('Invalid client id: ' . $id);
             }
 
-            $cmsMembersTable = new Application_Model_DbTable_CmsMembers();
+            $cmsClientsTable = new Application_Model_DbTable_CmsClients();
 
-            $member = $cmsMembersTable->getMemberById($id);
+            $client = $cmsClientsTable->getClientById($id);
 
 
-            if (empty($member)) {
+            if (empty($client)) {
 
-                throw new Zend_Controller_Router_Exception('No member is found with id: ' . $id, 'errors');
+                throw new Zend_Controller_Router_Exception('No client is found with id: ' . $id, 'errors');
             }
 
-            $cmsMembersTable->enableMember($id);
+            $cmsClientsTable->enableClient($id);
 
-
-            $flashMessenger->addMessage('Member ' . $member['first_name'] . ' ' . $member['last_name'] . 'has been enabled', 'success');
+            $flashMessenger->addMessage('Client ' . $client['first_name'] . ' ' . $client['last_name'] . 'has been enabled', 'success');
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -418,7 +391,7 @@ class Admin_MembersController extends Zend_Controller_Action {
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -434,7 +407,7 @@ class Admin_MembersController extends Zend_Controller_Action {
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -460,17 +433,16 @@ class Admin_MembersController extends Zend_Controller_Action {
             }
 
             $sortedIds = explode(',', $sortedIds);
-
-            $cmsMembersTable = new Application_Model_DbTable_CmsMembers();
-
-            $cmsMembersTable->updateOrderOfMembers($sortedIds);
-
+            
+            $cmsClientsTable = new Application_Model_DbTable_CmsClients();
+            $cmsClientsTable->updateOrderOfClients($sortedIds);
+            
             $flashMessenger->addMessage('Order is successfully saved', 'success');
-
+            
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
@@ -481,7 +453,7 @@ class Admin_MembersController extends Zend_Controller_Action {
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
                     ->gotoRoute(array(
-                        'controller' => 'admin_members',
+                        'controller' => 'admin_clients',
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);

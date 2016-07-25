@@ -10,7 +10,13 @@ class IndexController extends Zend_Controller_Action
 
     public function indexAction()
     {
-        // action body
+        $cmsClientsDbTable = new Application_Model_DbTable_CmsClients();
+       
+        $select = $cmsClientsDbTable->select();
+        $select->where('status = ?', Application_Model_DbTable_CmsClients::STATUS_ENABLED);
+                
+        $clients = $cmsClientsDbTable->fetchAll($select);
+        $this->view->clients = $clients;
     }
 
 
