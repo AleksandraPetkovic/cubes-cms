@@ -39,7 +39,7 @@ class Application_Form_Admin_ClientEdit extends Zend_Form {
                 ))
                 //disable move file to destination when calling method getValues
                 ->setValueDisabled(true)
-                ->setRequired(true);
+                ->setRequired(false);
 
         $this->addElement($clientPhoto);
     }

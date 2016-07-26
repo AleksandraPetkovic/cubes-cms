@@ -41,7 +41,7 @@ $this->headTitle('Clients');
                         foreach ($this->clients as $client) {
                             if ($client['status'] == Application_Model_DbTable_CmsClients::STATUS_DISABLED) {
                                 ?>
-                                <tr class="danger" data-member-id="<?php echo $this->escape($client['id']); ?>">
+                                <tr class="danger" data-client-id="<?php echo $this->escape($client['id']); ?>">
                                     <td class="text-center"><i data-action="sort" class="glyphicon glyphicon-list" style="display: none; cursor: pointer;"></i></td>
                                     <td class="text-center"><img style="max-height: 24px;" src="<?php echo $this->clientImgUrl($client); ?>"></td>
                                     <td class="text-center"><span class="badge alert-danger" title="disabled"><i class="glyphicon glyphicon-remove"></i></span></td>
@@ -61,7 +61,7 @@ $this->headTitle('Clients');
                                 <?php
                             } else {
                                 ?> 
-                                <tr data-member-id="<?php echo $this->escape($client['id']); ?>">
+                                <tr data-client-id="<?php echo $this->escape($client['id']); ?>">
                                     <td class="text-center"><i data-action="sort" class="glyphicon glyphicon-list" style="display: none; cursor: pointer;"></i></td>
                                     <td class="text-center"><img style="max-height: 24px;" src="<?php echo $this->clientImgUrl($client); ?>"></td>
                                     <td class="text-center"><span class="badge alert-success" title="enabled"><i class="glyphicon glyphicon-ok"></i></span></td>

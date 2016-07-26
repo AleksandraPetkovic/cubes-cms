@@ -11,7 +11,7 @@ class Admin_ClientsController extends Zend_Controller_Action {
             'errors' => $flashMessenger->getMessages('errors'),
         );
 
-        //prikaz svih member-a
+        //prikaz svih client-a
         $cmsClientsDbTable = new Application_Model_DbTable_CmsClients();
         //select je objekat klase Zend_Db_Select
         $select = $cmsClientsDbTable->select();

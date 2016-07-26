@@ -13,7 +13,8 @@ class IndexController extends Zend_Controller_Action
         $cmsClientsDbTable = new Application_Model_DbTable_CmsClients();
        
         $select = $cmsClientsDbTable->select();
-        $select->where('status = ?', Application_Model_DbTable_CmsClients::STATUS_ENABLED);
+        $select->where('status = ?', Application_Model_DbTable_CmsClients::STATUS_ENABLED)
+                ->order('order_number');
                 
         $clients = $cmsClientsDbTable->fetchAll($select);
         $this->view->clients = $clients;
