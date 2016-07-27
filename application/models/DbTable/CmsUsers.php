@@ -203,7 +203,7 @@ class Application_Model_DbTable_CmsUsers extends Zend_Db_Table_Abstract {
         //resetujemo vec setovane kolone
         $select->reset('columns');
         //set one column/field to fetch and it is COUNT function
-        $select->columns('COUNT(*) as total');
+        $select->from($this->_name, 'COUNT(*) as total');
         
         $row =  $this->fetchRow($select);
         

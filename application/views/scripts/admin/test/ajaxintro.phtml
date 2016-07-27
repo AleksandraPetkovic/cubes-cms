@@ -33,6 +33,7 @@ Zend_Layout::getMvcInstance()->disableLayout();
             
             var target = $(this).is('#car-brand') ? $(this) : $(this).closest('#car-brand');
             
+            //selektujemo vrednost
             var brand = target.val();
             //praznimo -reset
             var modelSelect = $('#car-model');
@@ -44,8 +45,18 @@ Zend_Layout::getMvcInstance()->disableLayout();
            
            if (brand) {
                $.ajax({
-                   url: '/uploads/cars/' + brand + '.json',
+                   //url do akcije controlera
+                   url: '<?php echo $this->url(array('controller' => 'admin_test', 'action' => 'ajaxmodels'), 'default', true);?>',
+                   //data je kljuc koji je objekat, prosledjivanje parametara koje prosledjujemo na url:
+                   //data je prazan po difoltu
+                   data:{
+                       "brand": brand
+                   },
+                           //method je po difoltu get ako se na navede
+                   method: "post",
+                   //nemoj da mi kesiras odgovor dohvati mi najsveziju informaciju
                    cashe: false
+                   
                }).done(function(data){
                    
                    for(var index in data) {
@@ -56,7 +67,9 @@ Zend_Layout::getMvcInstance()->disableLayout();
                        
                        selectOption.attr('value', model.value);
                        //ako hocemo tekst onda u mesto .html stavimo .text
-                       selectOption.html(model.label);
+                       //prikazuje html tagove
+                       //selectOption.html(model.label);
+                       //ono stro tretiramo prikazujemo kao tekst
                        selectOption.text(model.label);
                        
                        modelSelect.append(selectOption);

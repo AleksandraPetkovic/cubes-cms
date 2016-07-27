@@ -11,28 +11,9 @@ class Admin_UsersController extends Zend_Controller_Action
             'errors' => $flashMessenger->getMessages('errors'),
         );
         
-        $cmsUsersDbTable = new Application_Model_DbTable_CmsUsers();
         
-        //dobijamo ulogovanog user-a
-        $loggedInUser = Zend_Auth::getInstance()->getIdentity();
         
-        $users = $cmsUsersDbTable->search(array(
-            'filters' =>array (
-                //bitno je da se ovaj tekst poklapa sa switch-om
-                //on ne mora celi da se poklapa
-                //'username_search' => 'vic',
-                //daje praznu tabelu jer ne postoji username alek
-                //'username' => 'alek'
-                'id_exclude' => $loggedInUser['id']
-            ),
-            'orders' => array (
-                'first_name' => 'ASC'
-            ),
-//            'limit' => 3,
-//            'page' => 2
-        ));
-        
-        $this->view->users = $users;
+        $this->view->users = array();
         $this->view->systemMessages = $systemMessages;
     }
     
@@ -440,5 +421,114 @@ class Admin_UsersController extends Zend_Controller_Action
                         'action' => 'index',
                             ), 'default', true);
         }
+    }
+    
+    public function datatableAction(){
+        
+        $request = $this->getRequest();
+        
+        $datatableParameters = $request->getParams();
+        
+//        print_r($datatableParameters);
+//        die();
+        
+        /*
+         * Array
+(
+    [controller] => admin_users
+    [action] => datatable
+    [module] => default
+         //obavezan
+    [draw] => 1
+    
+    [order] => Array
+        (
+            [0] => Array
+                (
+                    [column] => 2
+                    [dir] => asc
+                )
+        )
+    [start] => 0
+    [length] => 3
+    [search] => Array
+        (
+            [value] => 
+            [regex] => false
+        )
+)
+         */
+        
+        $cmsUsersTable = new Application_Model_DbTable_CmsUsers();
+        
+        $loggedInUser = Zend_Auth::getInstance()->getIdentity();
+        
+        $filters = array(
+            'id_exclude' => $loggedInUser
+        );
+        $orders = array();
+        $limit = 5;
+        $page = 1;
+        $draw = 1;
+        
+        //actions cuvamo dugmice u toj koloni i nema je u bazi
+        $columns = array('status', 'username', 'first_name', 'last_name', 'email', 'actions');
+        
+        //Process datatable parameters
+        
+        if (isset($datatableParameters['draw'])){
+            
+            $draw = $datatableParameters['draw'];
+        
+            if(isset($datatableParameters['length'])){
+                // limit rows per page
+                $limit = $datatableParameters['length'];
+                
+            if(isset($datatableParameters['start'])){
+                
+                $page = floor($datatableParameters['start'] / $datatableParameters['length']) + 1;
+                }    
+            }
+        }
+        
+        if(
+           isset($datatableParameters['order'])  
+            && is_array($datatableParameters['order'])       
+                ){
+            foreach($datatableParameters['order'] as $datatableOrder){
+                $columnIndex = $datatableOrder ['column'];
+                $orderDirection = strtoupper($datatableOrder['dir']);
+                
+                if(isset($columns[$columnIndex])){
+                    $orders[$columns[$columnIndex]] = $orderDirection;
+                }
+            }
+        }
+        
+        
+        if(
+            isset($datatableParameters['search'])
+            && is_array($datatableParameters['search'])
+            && isset($datatableParameters['search'] ['value'] )      
+                ){
+        $filters['username_search'] = $datatableParameters['search']['value'];  
+        }
+        
+        $users = $cmsUsersTable->search(array (
+            'filters' => $filters,
+            'orders' => $orders,  
+            'limit' => $limit,
+            'page' => $page
+        ));
+        
+        $usersFilteredCount = $cmsUsersTable->count($filters);
+        $usersTotal = $cmsUsersTable->count();
+        
+        //prosledjivanje parametara prez logici
+        $this->view->users = $users;
+        $this->view->usersFilteredCount = $usersFilteredCount;
+        $this->view->usersTotal = $usersTotal;
+        $this->view->draw = $draw;
+        $this->view->columns = $columns;
     }
 }

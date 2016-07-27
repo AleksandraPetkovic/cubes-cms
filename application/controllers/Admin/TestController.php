@@ -39,33 +39,31 @@ class Admin_TestController extends Zend_Controller_Action {
                 'scenic' => 'Scenic'
             )
         );
-        
+
         $brandsJson = array();
-        
+
         //pravljenje niza
         foreach ($brands as $brand => $models) {
-            
+
             $brandsJson[] = array(
                 'value' => $brand,
                 'label' => ucfirst($brand)
             );
         }
-        
+
         //disable layout
         //Zend_Layout::getMvcInstance()->disableLayout();
-        
         //disable view script rendering
         //$this->getHelper('ViewRenderer')->setNoRender(true);
-        
         //set conetnt type as json instead of html
         //header('Content-Type: application/json');
-        
+        //vraca string 
         //echo json_encode($brandsJson);
-        
         //isto kao ovo gore samo preko helpera
         $this->getHelper('Json')->sendJson($brandsJson);
     }
 
+    // vraca json sa modelima
     public function ajaxmodelsAction() {
 
         $brands = array(
@@ -87,17 +85,33 @@ class Admin_TestController extends Zend_Controller_Action {
                 'scenic' => 'Scenic'
             )
         );
-        
+
         $request = $this->getRequest();
-        
+
+        //ovde ocekujemo da nam neko prosledi parametar brand na bilo koji nacin
         $brand = $request->getParam('brand');
-        
+
         //proveravamo da li postoji taj kljuc
-        
-        if(!isset($brands[$brand])) {
-            
+        //ukoliko postoji vadimo modele
+        if (!isset($brands[$brand])) {
+
             throw new Zend_Controller_Router_Exception('Unknown brand', 404);
         }
+
+        $models = $brands[$brand];
+
+        $modelsJson = array();
+
+        foreach ($models as $modelId => $modelLabel) {
+
+
+            $modelsJson[] = array(
+                'value' => $modelId,
+                'label' => $modelLabel
+            );
+        }
+
+        $this->getHelper('Json')->sendJson($modelsJson);
     }
 
 }
