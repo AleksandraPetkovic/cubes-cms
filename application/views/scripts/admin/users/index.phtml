@@ -5,8 +5,8 @@ $this->headTitle('Users');
     <h1>Users</h1>
 </div>
 <div class="row">
-    <div class="col-lg-12">
-<?php echo $this->systemMessagesHtml($this->systemMessages); ?>
+    <div class="col-lg-12" id="system-messages-container">
+        <?php echo $this->systemMessagesHtml($this->systemMessages); ?>
     </div>
 </div>
 <div class="row">
@@ -34,10 +34,11 @@ $this->headTitle('Users');
                         </tr>
                     </thead>
                     <tbody>
-<?php
-foreach ($this->users as $user) {
-    if ($user['status'] == Application_Model_DbTable_CmsUsers::STATUS_DISABLED) {
-        ?>
+                        
+                        <?php /*
+                        foreach ($this->users as $user) {
+                            if ($user['status'] == Application_Model_DbTable_CmsUsers::STATUS_DISABLED) {
+                                ?>
                                 <tr data-user-id="<?php echo $this->escape($user['id']); ?>" class="danger">
                                     <td class="text-center"><span class="badge alert-danger" title="disabled"><i class="glyphicon glyphicon-remove"></i></span></td>
                                     <td><?php echo $this->escape($user['username']); ?></td>
@@ -55,9 +56,9 @@ foreach ($this->users as $user) {
                                         </div>
                                     </td>
                                 </tr>
-        <?php
-    } else {
-        ?>
+                                <?php
+                            } else {
+                                ?>
                                 <tr data-user-id="<?php echo $this->escape($user['id']); ?>">
                                     <td class="text-center"><span class="badge alert-success" title="enabled"><i class="glyphicon glyphicon-ok"></i></span></td>
                                     <td><?php echo $this->escape($user['username']); ?></td>
@@ -76,13 +77,13 @@ foreach ($this->users as $user) {
                                         </div>
                                     </td>
                                 </tr>
-        <?php
-    }
-    ?>
+                                <?php
+                            }
+                            ?>
 
                             <?php
                         }
-                        ?>
+                       */ ?>
 
                     </tbody>
                 </table>
@@ -178,6 +179,20 @@ foreach ($this->users as $user) {
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </form><!-- /.modal -->
+
+<div style="display: none">
+    <div data-container="message-box-success" class="alert alert-success alert-dismissible" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <span data-container="message-text"></span>
+    </div>
+    
+    <div data-container="message-box-error" class="alert alert-danger alert-dismissible" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <span data-container="message-text"></span>
+    </div>
+    
+</div>
+
 
 
 <?php
@@ -279,18 +294,78 @@ $this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/datata
 
     });
 
-    $('#rows-table').dataTable({
-        //prosledjujemo JS objekat
+    $('#rows-table').DataTable({
+        //niz objekata //definicija za kolonu //prosledjujemo JS objekat
         columnDefs: [
-            {targets: [5], orderable: false, searchable: false}
+            {targets: [5], orderable: false, searchable: false},
+            {targets: [0, 5], className: 'text-center'}
         ],
         order: [
             [2, 'asc']
         ],
-        lengthMenu: [3, 5, 10, 20, 50, 100],
+        lengthMenu: [10, 20, 50, 100],
         serverSide: true,
         processing: true,
-        ajax: "<?php echo $this->url(array('controller' => 'admin_users', 'action' => 'datatable'), 'default', true);?>"
+        ajax: "<?php echo $this->url(array('controller' => 'admin_users', 'action' => 'datatable'), 'default', true); ?>"
+    });
+    
+    
+    //presretanje submita
+    $('#disable-warning-dialog').on('submit', function(e) {
+        e.preventDefault(); // stop manual form submit
+        
+        var target = $(this).is('#disable-warning-dialog') ? $(this) : $(this).closest('#disable-warning-dialog');
+        
+        //ajax zahtev
+        $.ajax({
+            url: '<?php echo $this->url(array('controller' => 'admin_users', 'action' => 'disable'), 'default', true);?>',
+            method: 'post',
+            data: {
+                task: 'disable',
+                id: target.find('[name = "id"]').val()
+            }
+    
+    
+            //u data se nalazi json
+        }).done(function(data) {
+            
+            if (data['status'] === 'ok') {
+                
+                var messageBox = $('[data-container="message-box-success"]').last().clone(true);
+                
+                messageBox.find('[data-container="message-text"]').text(data['statusMessage']);
+                //alert ('Success: ' + data['statusMessage']);
+                
+                //prikazivanje samo jedne poruke
+                //$('#system-messages-container').empty;
+                $('#system-messages-container').append(messageBox);
+                
+            } else {
+                
+                var messageBox = $('[data-container="message-box-error"]').last().clone(true);
+                
+                messageBox.find('[data-container="message-text"]').text(data['statusMessage']);
+                
+                
+                $('#system-messages-container').append(messageBox);
+                // alert ('Error: ' + data['statusMessage']);
+            }
+                
+            
+        }).fail(function() {
+            //znaci da li je doslo do greske sa serverom// neuspesna komunikacija sa serverom
+            
+            alert('Error: Server returned error');
+            
+        }).always(function() {
+            //zatvaranje modala
+            target.modal('hide');
+            
+            //refresh table keep selected page
+            //true ostaje na toj stranici, ako se izostavi onda se vraca na prvu stranicu
+            $('#rows-table').DataTable().draw(false);
+        });
+            
     });
 
 <?php $this->inlineScript()->captureEnd(); ?>

@@ -3,6 +3,7 @@ $datatableJson = array(
     'draw' => $this->draw,
     'recordsTotal' => $this->usersTotal,
     'recordsFiltered' => $this->usersFilteredCount,
+    //u data kljuc idu redovi u tabeli  /niz nizova
     'data' => array()
 );
 
@@ -10,6 +11,20 @@ $datatableJson = array(
 foreach ($this->users as $user) {
 
     $row = array();
+    
+    $row['DT_RowData'] = array (
+        'user-id' => $user['id']
+    );
+    
+    $row['DT_RowAttr'] = array (
+        'data-user-id' => $user['id'],
+        'title' => $user['username']
+    );
+    
+    // ako je user disejblovan ceo red ce biti crven (oznacen)
+    if ($user['status'] == Application_Model_DbTable_CmsUsers::STATUS_DISABLED){
+        $row['DT_RowClass'] = 'danger';
+    }
 
     foreach ($this->columns as $columnName) {
 
@@ -21,9 +36,9 @@ foreach ($this->users as $user) {
                 $row[] = '<span class="badge alert-danger" title="disabled"><i class="glyphicon glyphicon-remove"></i></span>';
             }
         } else if ($columnName == 'actions') {
-
+            //praznjenje placeholdera
             $this->placeholder('actions')->exchangeArray(array());
-
+            //hvatanje outputa i vracanje kao neke f-je
             $this->placeholder('actions')->captureStart();
 
             if ($user['status'] == Application_Model_DbTable_CmsUsers::STATUS_ENABLED) {
