@@ -149,7 +149,7 @@ class Admin_UsersController extends Zend_Controller_Action {
                 //save to database etc
                 //set system message
                 //ovde redjamo sistemske poruke
-                $flashMessenger->addMessage('Member has beeen updated', 'success');
+                $flashMessenger->addMessage('User has beeen updated', 'success');
                 //ovo su primera dva dole da vidimo kako izgleda
                 //$flashMessenger->addMessage('Or not maybe something is wrong', 'errors');
                 //$flashMessenger->addMessage('success message 2', 'success');
@@ -199,40 +199,80 @@ class Admin_UsersController extends Zend_Controller_Action {
 
 
                 //prekida se izvrsavanje programa i prikazuje se "Page not found"
-                throw new Zend_Controller_Router_Exception('Invalid user id: ' . $id);
+                throw new Application_Model_Exception_InvalidInput('Invalid user id: ' . $id);
             }
 
-            $cmsUsersTable = new Application_Model_DbTable_CmsMembers();
+            $cmsUsersTable = new Application_Model_DbTable_CmsUsers();
 
-            $user = $cmsUsersTable->getMemberById($id);
+            $user = $cmsUsersTable->getUserById($id);
 
 
             if (empty($user)) {
 
-                throw new Zend_Controller_Router_Exception('No user is found with id: ' . $id, 'errors');
+                throw new Application_Model_Exception_InvalidInput('No user is found with id: ' . $id, 'errors');
             }
 
             $cmsUsersTable->deleteUser($id);
 
-
-            $flashMessenger->addMessage('User ' . $user['first_name'] . ' ' . $user['last_name'] . 'has been deleted', 'success');
-            $redirector = $this->getHelper('Redirector');
-            $redirector->setExit(true)
-                    ->gotoRoute(array(
-                        'controller' => 'admin_members',
-                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
-                        'action' => 'index',
-                            ), 'default', true);
+            $request instanceof Zend_Controller_Request_Http;
+            
+            if($request->isXmlHttpRequest()) {
+                //request is ajax request
+                // send response as json
+                
+                $responseJson = array(
+                    'status' => 'ok',
+                    'statusMessage' => 'User ' . $user['first_name'] . ' ' . $user['last_name'] . 'has been deleted' 
+                );
+                
+                $this->getHelper('Json')->sendJson($responseJson);
+                
+            } else {
+                //request is not ajax
+                //send message over session (flashMessenger)
+                //and do direct
+                
+                    $flashMessenger->addMessage('User ' . $user['first_name'] . ' ' . $user['last_name'] . 'has been deleted', 'success');
+                    $redirector = $this->getHelper('Redirector');
+                    $redirector->setExit(true)
+                            ->gotoRoute(array(
+                                'controller' => 'admin_users',
+                                //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                                'action' => 'index',
+                                    ), 'default', true);
+            }
+            
+            
+            
+         
         } catch (Application_Model_Exception_InvalidInput $ex) {
-            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+            
+            if($request->isXmlHttpRequest()) {
+                
+                $responseJson = array(
+                    'status' => 'error',
+                    'statusMessage' => $ex->getMessage()
+                );
+                
+                $this->getHelper('Json')->sendJson($responseJson);
+                
+            } else {
+                //request is not ajax
+                //send message over session (flashMessenger)
+                //and do direct
+                
+                $flashMessenger->addMessage($ex->getMessage(), 'errors');
 
-            $redirector = $this->getHelper('Redirector');
-            $redirector->setExit(true)
-                    ->gotoRoute(array(
-                        'controller' => 'admin_users',
-                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
-                        'action' => 'index',
-                            ), 'default', true);
+                $redirector = $this->getHelper('Redirector');
+                $redirector->setExit(true)
+                        ->gotoRoute(array(
+                            'controller' => 'admin_users',
+                            //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                            'action' => 'index',
+                                ), 'default', true);
+            }
+            
+            
         }
     }
 
@@ -319,7 +359,7 @@ class Admin_UsersController extends Zend_Controller_Action {
                 );
                 
                 //send json as response
-                $this->getHelper('Json')->sendJson($resposneJson);
+                $this->getHelper('Json')->sendJson($responseJson);
                 
             } else {
                 
@@ -336,8 +376,6 @@ class Admin_UsersController extends Zend_Controller_Action {
                             'action' => 'index',
                                 ), 'default', true); 
             }
-            
-            
         }
     }
 
@@ -379,25 +417,51 @@ class Admin_UsersController extends Zend_Controller_Action {
             }
 
             $cmsUsersTable->enableUser($id);
+            
+            $request instanceof Zend_Controller_Request_Http;
+            //ispitivanje da li je ajax zahtev
+            if($request->isXmlHttpRequest()) {
+                
+                $responseJson = array (
+                    'status' => 'ok',
+                    'statusMessage' => 'User ' . $user['first_name'] . ' ' . $user['last_name'] . ' has been enabled'
+                );
+                
+                $this->getHelper('Json')->sendJson($responseJson);
+                
+            } else {
+                
+                $flashMessenger->addMessage('User ' . $user['first_name'] . ' ' . $user['last_name'] . ' has been enabled', 'success');
+                $redirector = $this->getHelper('Redirector');
+                $redirector->setExit(true)
+                        ->gotoRoute(array(
+                            'controller' => 'admin_users',
+                            //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                            'action' => 'index',
+                                ), 'default', true);
+            }
 
-            $flashMessenger->addMessage('User ' . $user['first_name'] . ' ' . $user['last_name'] . ' has been enabled', 'success');
-            $redirector = $this->getHelper('Redirector');
-            $redirector->setExit(true)
-                    ->gotoRoute(array(
-                        'controller' => 'admin_users',
-                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
-                        'action' => 'index',
-                            ), 'default', true);
+            
         } catch (Application_Model_Exception_InvalidInput $ex) {
-            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+            
+            if ($request->isXmlHttpRequest()) {
+                
+                $responseJson = array (
+                    'status' => 'error',
+                    'statusMessage' => $ex->getMessage()
+                );
+                
+            } else {
+                $flashMessenger->addMessage($ex->getMessage(), 'errors');
 
-            $redirector = $this->getHelper('Redirector');
-            $redirector->setExit(true)
-                    ->gotoRoute(array(
-                        'controller' => 'admin_users',
-                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
-                        'action' => 'index',
-                            ), 'default', true);
+                $redirector = $this->getHelper('Redirector');
+                $redirector->setExit(true)
+                        ->gotoRoute(array(
+                            'controller' => 'admin_users',
+                            //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                            'action' => 'index',
+                                ), 'default', true);
+            }
         }
     }
 
@@ -440,16 +504,42 @@ class Admin_UsersController extends Zend_Controller_Action {
 
             $cmsUsersTable->resetUserPassword($id);
 
-            $flashMessenger->addMessage('Password has been reset successfully for ' . $user['first_name'] . ' ' . $user['last_name'], 'success');
-            $redirector = $this->getHelper('Redirector');
-            $redirector->setExit(true)
-                    ->gotoRoute(array(
-                        'controller' => 'admin_users',
-                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
-                        'action' => 'index',
-                            ), 'default', true);
+            $request instanceof Zend_Controller_Request_Http;
+            
+            if ($request->isXmlHttpRequest()){
+                
+                $responseJson = array (
+                  'status' => 'ok',
+                  'statusMessage' => 'Password has been reset successfully for ' . $user['first_name'] . ' ' . $user['last_name']
+                );
+                
+                $this->getHelper('Json')->sendJson($responseJson);
+                
+            } else {
+                $flashMessenger->addMessage('Password has been reset successfully for ' . $user['first_name'] . ' ' . $user['last_name'], 'success');
+                $redirector = $this->getHelper('Redirector');
+                $redirector->setExit(true)
+                        ->gotoRoute(array(
+                            'controller' => 'admin_users',
+                            //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                            'action' => 'index',
+                                ), 'default', true);
+            }
+
+
+            
         } catch (Application_Model_Exception_InvalidInput $ex) {
-            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+            
+            if($request->isXmlHttpRequest()){
+                $responseJson = array (
+                  'status' => 'ok',
+                  'statusMessage' => $ex->getMessage()
+                );
+                
+                $this->getHelper('Json')->sendJson($responseJson);
+                
+            } else {
+                $flashMessenger->addMessage($ex->getMessage(), 'errors');
 
             $redirector = $this->getHelper('Redirector');
             $redirector->setExit(true)
@@ -458,6 +548,7 @@ class Admin_UsersController extends Zend_Controller_Action {
                         //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
                         'action' => 'index',
                             ), 'default', true);
+            }
         }
     }
 
@@ -565,6 +656,11 @@ class Admin_UsersController extends Zend_Controller_Action {
         $this->view->usersTotal = $usersTotal;
         $this->view->draw = $draw;
         $this->view->columns = $columns;
+    }
+    
+    
+    public function dashboardAction(){
+        
     }
 
 }

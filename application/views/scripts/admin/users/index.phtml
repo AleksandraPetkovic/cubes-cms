@@ -180,6 +180,7 @@ $this->headTitle('Users');
     </div><!-- /.modal-dialog -->
 </form><!-- /.modal -->
 
+
 <div style="display: none">
     <div data-container="message-box-success" class="alert alert-success alert-dismissible" role="alert">
                   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -190,7 +191,6 @@ $this->headTitle('Users');
                   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                   <span data-container="message-text"></span>
     </div>
-    
 </div>
 
 
@@ -303,14 +303,14 @@ $this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/datata
         order: [
             [2, 'asc']
         ],
-        lengthMenu: [10, 20, 50, 100],
+        lengthMenu: [3, 10, 20, 50, 100],
         serverSide: true,
         processing: true,
         ajax: "<?php echo $this->url(array('controller' => 'admin_users', 'action' => 'datatable'), 'default', true); ?>"
     });
     
     
-    //presretanje submita
+    //presretanje submita //disable
     $('#disable-warning-dialog').on('submit', function(e) {
         e.preventDefault(); // stop manual form submit
         
@@ -367,6 +367,177 @@ $this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/datata
         });
             
     });
-
+    
+    
+    
+    //delete
+    $('#delete-warning-dialog').on('submit', function(e) {
+        e.preventDefault(); // stop manual form submit
+        
+        var target = $(this).is('#delete-warning-dialog') ? $(this) : $(this).closest('#delete-warning-dialog');
+        
+        //ajax zahtev
+        $.ajax({
+            url: '<?php echo $this->url(array('controller' => 'admin_users', 'action' => 'delete'), 'default', true);?>',
+            method: 'post',
+            data: {
+                task: 'delete',
+                id: target.find('[name = "id"]').val()
+            }
+    
+    
+            //u data se nalazi json
+        }).done(function(data) {
+            
+            if (data['status'] === 'ok') {
+                
+                var messageBox = $('[data-container="message-box-success"]').last().clone(true);
+                
+                messageBox.find('[data-container="message-text"]').text(data['statusMessage']);
+                
+                $('#system-messages-container').append(messageBox);
+                
+            } else {
+                
+                var messageBox = $('[data-container="message-box-error"]').last().clone(true);
+                
+                messageBox.find('[data-container="message-text"]').text(data['statusMessage']);
+                
+                
+                $('#system-messages-container').append(messageBox);
+            }
+                
+            
+        }).fail(function() {
+            //znaci da li je doslo do greske sa serverom// neuspesna komunikacija sa serverom
+            
+            alert('Error: Server returned error');
+            
+        }).always(function() {
+            //zatvaranje modala
+            target.modal('hide');
+            
+            //refresh table keep selected page
+            //true ostaje na toj stranici, ako se izostavi onda se vraca na prvu stranicu
+            $('#rows-table').DataTable().draw(false);
+        });
+            
+    });
+    
+    
+    
+    //enable
+    $('#enable-warning-dialog').on('submit', function(e) {
+        e.preventDefault(); // stop manual form submit
+        
+        var target = $(this).is('#enable-warning-dialog') ? $(this) : $(this).closest('#enable-warning-dialog');
+        
+        //ajax zahtev
+        $.ajax({
+            url: '<?php echo $this->url(array('controller' => 'admin_users', 'action' => 'enable'), 'default', true);?>',
+            method: 'post',
+            data: {
+                task: 'enable',
+                id: target.find('[name = "id"]').val()
+            }
+    
+    
+            //u data se nalazi json
+        }).done(function(data) {
+            
+            if (data['status'] === 'ok') {
+                
+                var messageBox = $('[data-container="message-box-success"]').last().clone(true);
+                
+                messageBox.find('[data-container="message-text"]').text(data['statusMessage']);
+                
+                $('#system-messages-container').append(messageBox);
+                
+            } else {
+                
+                var messageBox = $('[data-container="message-box-error"]').last().clone(true);
+                
+                messageBox.find('[data-container="message-text"]').text(data['statusMessage']);
+                
+                
+                $('#system-messages-container').append(messageBox);
+            }
+                
+            
+        }).fail(function() {
+            //znaci da li je doslo do greske sa serverom// neuspesna komunikacija sa serverom
+            
+            alert('Error: Server returned error');
+            
+        }).always(function() {
+            //zatvaranje modala
+            target.modal('hide');
+            
+            //refresh table keep selected page
+            //true ostaje na toj stranici, ako se izostavi onda se vraca na prvu stranicu
+            $('#rows-table').DataTable().draw(false);
+        });
+            
+    });
+    
+    
+    
+    
+    //reset pass
+    $('#resetpassword-warning-dialog').on('submit', function(e) {
+        e.preventDefault(); // stop manual form submit
+        
+        var target = $(this).is('#resetpassword-warning-dialog') ? $(this) : $(this).closest('#resetpassword-warning-dialog');
+        
+        //ajax zahtev
+        $.ajax({
+            url: '<?php echo $this->url(array('controller' => 'admin_users', 'action' => 'resetpassword'), 'default', true);?>',
+            method: 'post',
+            data: {
+                task: 'resetpassword',
+                id: target.find('[name = "id"]').val()
+            }
+    
+    
+        }).done(function(data) {
+            
+            if (data['status'] === 'ok') {
+                
+                var messageBox = $('[data-container="message-box-success"]').last().clone(true);
+                
+                messageBox.find('[data-container="message-text"]').text(data['statusMessage']);
+                
+                $('#system-messages-container').append(messageBox);
+                
+            } else {
+                
+                var messageBox = $('[data-container="message-box-error"]').last().clone(true);
+                
+                messageBox.find('[data-container="message-text"]').text(data['statusMessage']);
+                
+                
+                $('#system-messages-container').append(messageBox);
+            }
+                
+            
+        }).fail(function() {
+            //znaci da li je doslo do greske sa serverom// neuspesna komunikacija sa serverom
+            
+            alert('Error: Server returned error');
+            
+        }).always(function() {
+            //zatvaranje modala
+            target.modal('hide');
+            
+            //refresh table keep selected page
+            //true ostaje na toj stranici, ako se izostavi onda se vraca na prvu stranicu
+            $('#rows-table').DataTable().draw(false);
+        });
+            
+    });
+    
+    
+    
+    
 <?php $this->inlineScript()->captureEnd(); ?>
 </script>    
