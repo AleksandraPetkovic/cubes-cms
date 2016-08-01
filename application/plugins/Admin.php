@@ -10,7 +10,7 @@ class Application_Plugin_Admin extends Zend_Controller_Plugin_Abstract
         $controllerName = $request->getControllerName();
         
         $actionName = $request->getActionName();
-        
+        //mora da se uloguje da bi dosao do admin dela
         if(preg_match('/^admin_/', $controllerName)){
             
             Zend_Layout::getMvcInstance()->setLayout('admin'); //ova klasa renderuje objekat koji mi kazemo// setuje layout

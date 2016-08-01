@@ -45,6 +45,8 @@ class AboutusController extends Zend_Controller_Action
             throw new Zend_Controller_Router_Exception('No member id', 404);
         }
         
+        
+        
         $cmsMembersDbTable = new Application_Model_DbTable_CmsMembers();
         
         $select = $cmsMembersDbTable->select();
@@ -59,6 +61,17 @@ class AboutusController extends Zend_Controller_Action
         }
         
         $member = $foundMembers[0];
+        
+        //pokusamo da dobijemo parametre member slug i onda redirektujemo
+//        $memberSlug = $request->getParam('member_slug');
+//        if (empty($memberSlug)){
+//            $redirector = $this->getHelper('Redirector');
+//            $redirector->setExit(true)
+//                        ->gotoRoute(array(
+//                            'id' => $member['id'],
+//                            'member_slug' => $member['first_name'] . '-' . $member['last_name']
+//                                ), 'member-route', true);
+//        }
         
         //Fetching all other members
         $select = $cmsMembersDbTable->select();

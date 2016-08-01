@@ -68,11 +68,12 @@ $this->headTitle('Member - ' . $member['first_name'] . ' ' . $member['last_name'
                                 }
                                 $i++;
                                 
-                                $memberUrl = $this->baseUrl('/aboutus/member/id/' . $member['id']);
+                                
                                 ?>
                                 <li class="col-sm-6 col-md-3">
                                 <a 
-                                    href="<?php echo $memberUrl; ?>"
+                                    href="<?php echo $this->memberUrl($member);?>" 
+                                                
                                     >
                                     <img alt="<?php echo $this->escape($member['first_name'])?>" class="img-polaroid" src="<?php echo $this->memberImgUrl($member);?>">
                                 </a>
