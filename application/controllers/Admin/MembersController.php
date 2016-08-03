@@ -26,8 +26,8 @@ class Admin_MembersController extends Zend_Controller_Action {
 //                'first_name' => 'ASC',
 //                'last_name' => 'ASC'
 //            ),
-//            //'limit' => 50,
-//            //'page' => 3
+//            //'limit' => 4,
+//            //'page' => 2
 //        ));
         
         $members = $cmsMembersDbTable->search(array(
