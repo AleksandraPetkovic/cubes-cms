@@ -14,15 +14,28 @@ class Admin_MembersController extends Zend_Controller_Action {
         //prikaz svih member-a
         $cmsMembersDbTable = new Application_Model_DbTable_CmsMembers();
 
-        //select je objekat klase Zend_Db_Select
-        $select = $cmsMembersDbTable->select();
-
-        $select->order('order_number');
-
-        //debug za  db select - vraca se sql upit
-        //die($select->assemble());
-
-        $members = $cmsMembersDbTable->fetchAll($select);
+//        $members = $cmsMembersDbTable->search(array(
+//            'filters' => array(
+//                'status' => Application_Model_DbTable_CmsMembers::STATUS_ENABLED,
+//                'work_title' => array(
+//                    'PHP Developer', 'lwvknrlbjnr'
+//                    )
+//            ),
+//            'orders' => array(
+//                'work_title' => 'ASC',
+//                'first_name' => 'ASC',
+//                'last_name' => 'ASC'
+//            ),
+//            //'limit' => 50,
+//            //'page' => 3
+//        ));
+        
+        $members = $cmsMembersDbTable->search(array(
+            'orders' => array(
+                'order_number' => 'ASC'
+            )
+        ));
+            
 
         $this->view->members = $members;
         $this->view->systemMessages = $systemMessages;
@@ -488,4 +501,19 @@ class Admin_MembersController extends Zend_Controller_Action {
         }
     }
 
+    public function dashboardAction(){
+        
+        $cmsMembersDbTable = new Application_Model_DbTable_CmsMembers();
+        
+        $countOfEnabledMembers = $cmsMembersDbTable->count(array(
+            'status' => Application_Model_DbTable_CmsMembers::STATUS_ENABLED,
+        ));
+        
+        $countAlldMembers = $cmsMembersDbTable->count();
+    
+        $this->view->countOfEnabledMembers = $countOfEnabledMembers;
+        $this->view->countAlldMembers = $countAlldMembers;
+    }
+    
+    
 }
