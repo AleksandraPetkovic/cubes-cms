@@ -459,5 +459,19 @@ class Admin_ClientsController extends Zend_Controller_Action {
                             ), 'default', true);
         }
     }
+    
+    public function dashboardAction(){
+        
+        $cmsClientsDbTable = new Application_Model_DbTable_CmsClients();
+        
+        $countOfEnabledClients = $cmsClientsDbTable->count(array(
+            'status' => Application_Model_DbTable_CmsClients::STATUS_ENABLED,
+        ));
+        
+        $countAllClients = $cmsClientsDbTable->count();
+    
+        $this->view->countOfEnabledClients = $countOfEnabledClients;
+        $this->view->countAllClients = $countAllClients;
+    }
 
 }

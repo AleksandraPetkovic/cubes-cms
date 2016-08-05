@@ -509,10 +509,10 @@ class Admin_MembersController extends Zend_Controller_Action {
             'status' => Application_Model_DbTable_CmsMembers::STATUS_ENABLED,
         ));
         
-        $countAlldMembers = $cmsMembersDbTable->count();
+        $countAllMembers = $cmsMembersDbTable->count();
     
         $this->view->countOfEnabledMembers = $countOfEnabledMembers;
-        $this->view->countAlldMembers = $countAlldMembers;
+        $this->view->countAllMembers = $countAllMembers;
     }
     
     

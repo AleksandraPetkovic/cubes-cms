@@ -422,5 +422,19 @@ class Admin_ServicesController extends Zend_Controller_Action {
                             ), 'default', true);
         }
     }
+    
+    public function dashboardAction(){
+        
+        $cmsServicesDbTable = new Application_Model_DbTable_CmsServices();
+        
+        $countOfEnabledServices = $cmsServicesDbTable->count(array(
+            'status' => Application_Model_DbTable_CmsServices::STATUS_ENABLED,
+        ));
+        
+        $countAllServices = $cmsServicesDbTable->count();
+    
+        $this->view->countOfEnabledServices = $countOfEnabledServices;
+        $this->view->countAllServices = $countAllServices;
+    }
 
 }

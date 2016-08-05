@@ -661,6 +661,17 @@ class Admin_UsersController extends Zend_Controller_Action {
     
     public function dashboardAction(){
         
+        $cmsUsersDbTable = new Application_Model_DbTable_CmsUsers();
+        
+        $countOfEnabledUsers = $cmsUsersDbTable->count(array(
+            'status' => Application_Model_DbTable_CmsUsers::STATUS_ENABLED,
+        ));
+        
+        $countAllUsers = $cmsUsersDbTable->count();
+    
+        $this->view->countOfEnabledUsers = $countOfEnabledUsers;
+        $this->view->countAllUsers = $countAllUsers;
     }
+
 
 }
