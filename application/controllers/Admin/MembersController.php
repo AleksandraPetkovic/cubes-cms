@@ -168,7 +168,7 @@ class Admin_MembersController extends Zend_Controller_Action {
             'errors' => $flashMessenger->getMessages('errors'),
         );
         //forma sluzi za filtriranje i validaciju polja
-        $form = new Application_Form_Admin_MemberEdit();
+        $form = new Application_Form_Admin_MemberAdd();
 
         //default form data
         $form->populate($member);

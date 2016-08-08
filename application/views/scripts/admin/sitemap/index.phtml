@@ -102,7 +102,7 @@ $this->headTitle('Site Map Pages');
                                                                                     'id' => $sitemapPage['id']
                                                                                 ), 'default', true);?>"
 										type="button" class="btn btn-default" title="edit"><i class="glyphicon glyphicon-pencil"></i></a>
-									<button type="button" class="btn btn-default" title="enable"><i class="glyphicon glyphicon-ok"></i></button>
+									<button data-sitemap-page-id="<?php echo $this->escape($sitemapPage['id']);?>" data-action="enable" type="button" class="btn btn-default" title="enable"><i class="glyphicon glyphicon-ok"></i></button>
 									<button data-sitemap-page-id="<?php echo $this->escape($sitemapPage['id']);?>" data-action="delete" type="button" class="btn btn-default" title="delete"><i class="glyphicon glyphicon-trash"></i></button>
 								
 								</div>
@@ -201,6 +201,27 @@ $this->headTitle('Site Map Pages');
   </div><!-- /.modal-dialog -->
 </form><!-- /.modal -->
 
+
+<form method="post" action="<?php echo $this->url(array('controller' => 'admin_sitemap', 'action' => 'enable'), 'default', true);?>" id="enable-warning-dialog" class="modal fade" tabindex="-1" role="dialog">
+	<input type="hidden" name="task" value="enable">
+	<input type="hidden" name="id" value="">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Enable sitemap page</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to enable sitemap page?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-ok"></i> Enable</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</form><!-- /.modal -->
+
 <form method="post" action="<?php echo $this->url(array('controller' => 'admin_sitemap', 'action' => 'updateorder'), 'default', true);?>" style="display: none;" id="save-order-form">
 	<input type="hidden" name="task" value="saveOrder">
 	<input type="hidden" name="sorted_ids" value="">
@@ -211,7 +232,7 @@ $this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/jquery
 ?>
 <script>
 <?php $this->inlineScript()->captureStart(); ?>
-	
+	//delete
 	$('#rows-table').on('click', '[data-action="delete"]', function(e) {
 		
 		e.preventDefault();
@@ -233,6 +254,7 @@ $this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/jquery
 		$('#delete-warning-dialog').modal('show');
 	});
 	
+        //disable
 	$('#rows-table').on('click', '[data-action="disable"]', function(e) {
 		
 		e.preventDefault();
@@ -247,13 +269,35 @@ $this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/jquery
 		//get data- attributes
 		//var sitemapPageId = target.data('sitemapPageId');
 		
-		
 		//set value for input field with name "id"
 		$('#disable-warning-dialog').find('[name="id"]').val(sitemapPageId);
 		
 		$('#disable-warning-dialog').modal('show');
 	});
+        
+        //enable
+        $('#rows-table').on('click', '[data-action="enable"]', function(e) {
+		
+		e.preventDefault();
+		e.stopPropagation();
+		
+		//calculate target element
+		var target = $(this).is('[data-action="enable"]') ? $(this) : $(this).closest('[data-action="enable"]');
+		
+		//get any attribute
+		var sitemapPageId = target.attr('data-sitemap-page-id');
+		
+		//get data- attributes
+		//var sitemapPageId = target.data('sitemapPageId');
+		
+		//set value for input field with name "id"
+		$('#enable-warning-dialog').find('[name="id"]').val(sitemapPageId);
+		
+		$('#enable-warning-dialog').modal('show');
+	});
+        
 	
+        //sort
 	$('[data-action="toggle-sort"]').on('click', function(e) {
 		
 		e.preventDefault();
@@ -324,6 +368,9 @@ $this->inlineScript()->appendFile($this->baseUrl('/admin/bower_components/jquery
 		// manually submit form by triggering "submit" event
 		saveOrderForm.trigger('submit');
 	});
+        
+        
+
 	
 <?php $this->inlineScript()->captureEnd(); ?>
 </script>

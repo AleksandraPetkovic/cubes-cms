@@ -276,6 +276,196 @@ class Admin_SitemapController extends Zend_Controller_Action
         $this->view->form = $form;
         $this->view->sitemapPage = $sitemapPage;
     }
+    
+    
+    public function disableAction() {
+
+        $request = $this->getRequest();
+
+        if (!$request->isPost() || $request->isPost('task') != 'disable') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                            //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                            'action' => 'index',
+                            'id' => $sitemapPage['parent_id']
+                                ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+                 //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Zend_Controller_Router_Exception('Invalid SitemapPage id: ' . $id);
+            }
+
+            $cmsSitemapPagesTable = new Application_Model_DbTable_CmsSitemapPages();
+
+            $sitemapPage = $cmsSitemapPagesTable->getSitemapPageById($id);
+
+
+            if (empty($sitemapPage)) {
+
+                throw new Zend_Controller_Router_Exception('No SitemapPage is found with id: ' . $id, 'errors');
+            }
+
+            $cmsSitemapPagesTable->disableSitemapPage($id);
+
+
+            $flashMessenger->addMessage('SitemapPage with type ' . $sitemapPage['type'] . ' and title ' . $sitemapPage['title'] . ' has been disabled', 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                            //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                            'action' => 'index',
+                            'id' => $sitemapPage['parent_id']
+                                ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                            'action' => 'index',
+                            'id' => $sitemapPage['parent_id']
+                                ), 'default', true);
+        }
+    }
+
+    public function enableAction() {
+
+        $request = $this->getRequest();
+
+        if (!$request->isPost() || $request->isPost('task') != 'enable') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                            'action' => 'index',
+                            'id' => $sitemapPage['parent_id']
+                                ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+                //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Zend_Controller_Router_Exception('Invalid Sitemap Page id: ' . $id);
+            }
+
+            $cmsSitemapPagesTable = new Application_Model_DbTable_CmsSitemapPages();
+
+            $sitemapPage = $cmsSitemapPagesTable->getSitemapPageById($id);
+
+            if (empty($sitemapPage)) {
+
+                throw new Zend_Controller_Router_Exception('No Sitemap Page is found with id: ' . $id, 'errors');
+            }
+
+            $cmsSitemapPagesTable->enableSitemapPage($id);
+
+
+            $flashMessenger->addMessage('SitemapPage with type ' . $sitemapPage['type'] . ' and title ' . $sitemapPage['title'] . ' has been enabled', 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                            'action' => 'index',
+                            'id' => $sitemapPage['parent_id']
+                                ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                            'action' => 'index',
+                            'id' => $sitemapPage['parent_id']
+                                ), 'default', true);
+        }
+    }
+
+    public function updateorderAction() {
+        
+        $request = $this->getRequest();
+
+        if (!$request->isPost() || $request->isPost('task') != 'saveOrder') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                            'action' => 'index',
+                            'id' => $sitemapPage['parent_id']
+                                ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+
+            $sortedIds = $request->getPost('sorted_ids');
+
+            if (empty($sortedIds)) {
+                throw new Application_Model_Exception_InvalidInput('Sorted ids are not sent');
+            }
+
+            //trimujemo po spejsu i po zarezu
+            $sortedIds = trim($sortedIds, ' ,');
+
+            //proveravamo da li je od nula do devet i zarez i mora da ima vise od jednog karaktera
+            //zvezda znaci da ono sto je u zagradi da moze vise puta da se nadje
+            if (!preg_match('/^[0-9]+(,[0-9]+)*$/', $sortedIds)) {
+                throw new Application_Model_Exception_InvalidInput('Invalid sorted ids: ' . $sortedIds);
+            }
+
+            $sortedIds = explode(',', $sortedIds);
+
+            $cmsSitemapPagesTable = new Application_Model_DbTable_CmsSitemapPages();
+
+            $cmsSitemapPagesTable->updateOrderOfSitemapPages($sortedIds);
+
+            $flashMessenger->addMessage('Order is successfully saved', 'success');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                            'action' => 'index',
+                            'id' => $sitemapPage['parent_id']
+                                ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                            'action' => 'index',
+                            'id' => $sitemapPage['parent_id']
+                                ), 'default', true);
+        }
+    }
         
 }
 

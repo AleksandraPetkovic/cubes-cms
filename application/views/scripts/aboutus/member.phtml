@@ -37,6 +37,7 @@ $this->headTitle('Member - ' . $member['first_name'] . ' ' . $member['last_name'
                             <a data-original-title="Facebook" data-placement="top" class="_tooltip" href="#"><i class="fa fa-facebook"></i></a>
                             <a data-original-title="LinkedIn" data-placement="top" class="_tooltip" href="#"><i class="fa fa-linkedin"></i></a>
                             <a data-original-title="Google +" data-placement="top" class="_tooltip" href="#"><i class="fa fa-google-plus"></i></a>
+                            <a data-original-title="AskMember" data-placement="top" class="_tooltip" href="<?php echo $this->url( array( 'controller' => 'contact', 'action' => 'askmember', 'id' => $this->member['id'], 'member_slug' => $this->member['first_name'] . '-' . $this->member['last_name']), 'ask-member-route', true) ;?>"><i class="fa fa-comment"></i></a>
                         </div>
                     </div>
                 </div>
