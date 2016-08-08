@@ -7,6 +7,55 @@ class Application_Model_DbTable_CmsSitemapPages extends Zend_Db_Table_Abstract
 
     protected $_name = 'cms_sitemap_pages';
     
+    protected static $sitemapPagesMap;  
+    
+    
+    /**
+     * 
+     * @return array with keys as sitemap page ids and values as assoc, array with keys url and type
+     */
+    public static function getSitemapPageMap() {
+        //staticka promenljiva
+        //lazy loading
+        if (!self::$sitemapPagesMap) {
+            
+                $sitemapPageMap = array();
+
+            //$cmsSitemapPagesDbTable = new Application_Model_DbTable_CmsSitemapPages();
+            //isto sto i ovo gore
+            $cmsSitemapPagesDbTable = new self();
+
+            $sitemapPages = $cmsSitemapPagesDbTable->search(array(
+                'orders' => array(
+                    'parent_id' => 'ASC',
+                    'order_number' => 'ASC'
+                )
+            ));
+
+            foreach($sitemapPages as $sitemapPage) {
+
+                $type = $sitemapPage['type'];
+                $url = $sitemapPage['url_slug'];
+
+                if(isset($sitemapPagesMap[$sitemapPage['parent_id']])) {
+
+                    $url = $sitemapPagesMap[$sitemapPage['parent_id']]['url'] . '/' . $url;
+                }
+
+                $sitemapPagesMap[$sitemapPage['id']] = array(
+                    'url' => $url,
+                    'type' => $type
+                );
+
+            }
+
+            self::$sitemapPagesMap = $sitemapPagesMap;
+        }
+        
+        return self::$sitemapPagesMap;
+        
+    }
+    
     /**
      * 
      * @param int $id
@@ -85,6 +134,19 @@ class Application_Model_DbTable_CmsSitemapPages extends Zend_Db_Table_Abstract
         //sitemapPage who is going to be deleted
         $sitemapPage = $this->getSitemapPageById($id);
         
+        $sitemapPageChildren = $this->search(array(
+            'filters' => array(
+                'parent_id' => $sitemapPage['id']
+            )
+        ));
+        
+        //delete children recursively
+        foreach ($sitemapPageChildren as $sitemapPageChild) {
+            
+            $this->deleteSitemapPage($sitemapPageChild['id']);
+        }
+        
+        
         $this->update(array(
             //ovako se u zendu naglasava
             'order_number' => new Zend_Db_Expr('order_number - 1')
@@ -92,6 +154,8 @@ class Application_Model_DbTable_CmsSitemapPages extends Zend_Db_Table_Abstract
             'order_number > ' . $sitemapPage['order_number'] . ' AND parent_id = ' .  $sitemapPage['parent_id']);
         
         $this->delete('id = ' . $id);
+        
+        
     }
 
     /**

@@ -34,8 +34,9 @@ class Application_Form_Admin_SitemapPageAdd extends Zend_Form
         $type->addMultiOption('', '--- Select SiteMap Page Type ---')
              ->addMultiOptions(array(
                  'StaticPage' => 'Static Page',
+                 'AboutUsPage' => 'About Us Page',
+                 'ContactPage' => 'Contact Page',
              ))->setRequired(true);
-        
         //doddavanje na formu
         $this->addElement($type);
         

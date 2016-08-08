@@ -92,7 +92,7 @@ $this->headTitle('Site Map Pages');
 							<td class="text-center">
 								<div class="btn-group btn-group-sm" role="group" aria-label="...">
 									<a 
-										href="#"
+										href="<?php echo $this->sitemapPageUrl($sitemapPage['id']);?>"
 										target="_blank"
 										type="button" class="btn btn-default" title="preview"><i class="glyphicon glyphicon-eye-open"></i></a>
 									<a 
@@ -128,7 +128,7 @@ $this->headTitle('Site Map Pages');
 							<td class="text-center">
 								<div class="btn-group btn-group-sm" role="group" aria-label="...">
 									<a 
-										href="#"
+										href="<?php echo $this->sitemapPageUrl($sitemapPage['id']);?>"
 										target="_blank"
 										type="button" class="btn btn-default" title="preview"><i class="glyphicon glyphicon-eye-open"></i></a>
 									<a 
@@ -222,7 +222,7 @@ $this->headTitle('Site Map Pages');
   </div><!-- /.modal-dialog -->
 </form><!-- /.modal -->
 
-<form method="post" action="<?php echo $this->url(array('controller' => 'admin_sitemap', 'action' => 'updateorder'), 'default', true);?>" style="display: none;" id="save-order-form">
+<form method="post" action="<?php echo $this->url(array('controller' => 'admin_sitemap', 'action' => 'updateorder', 'id' => $sitemapPage['id']), 'default', true);?>" style="display: none;" id="save-order-form">
 	<input type="hidden" name="task" value="saveOrder">
 	<input type="hidden" name="sorted_ids" value="">
 </form>

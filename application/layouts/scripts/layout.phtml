@@ -7,8 +7,7 @@
                 
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<!-- @todo: fill with your company info or remove -->
-		<meta name="description" content="">
-		<meta name="author" content="Cubes School">
+		<?php echo $this->headMeta();?>
 		<!-- Bootstrap CSS -->
 		<link href="<?php echo $this->baseUrl('/plugins/bootstrap/dist/css/bootstrap.min.css');?>" rel="stylesheet">
 		<!-- Font Awesome CSS -->
@@ -61,7 +60,7 @@
 										<a href="<?php echo $this->baseUrl('/');?>">Home</a>
 									</li>
                                                                         <li>
-										<a href="<?php echo $this->baseUrl('/service/index');?>">Services</a>
+										<a href="<?php echo $this->baseUrl('/services/index');?>">Services</a>
 									</li>
                                                                         <li>
 										<a href="<?php echo $this->baseUrl('/aboutus/index');?>">About us</a>
@@ -71,7 +70,7 @@
 									</li>
 									
 									<li>
-										<a href="<?php echo $this->baseUrl('/admin_session');?>"><i class="fa fa-user"></i> Login</a>
+										<a href="<?php echo $this->baseUrl('/admin_session/login');?>"><i class="fa fa-user"></i> Login</a>
 									</li>
 								</ul>
 							</div>

@@ -407,6 +407,8 @@ class Admin_SitemapController extends Zend_Controller_Action
         
         $request = $this->getRequest();
 
+        $parentId = $this->getParam('id');
+        
         if (!$request->isPost() || $request->isPost('task') != 'saveOrder') {
             //request is not post redirect to index page
             //redirect to same or another page
@@ -415,7 +417,7 @@ class Admin_SitemapController extends Zend_Controller_Action
                     ->gotoRoute(array(
                         'controller' => 'admin_sitemap',
                             'action' => 'index',
-                            'id' => $sitemapPage['parent_id']
+                            'id' => $parentId
                                 ), 'default', true);
         }
 
@@ -451,7 +453,7 @@ class Admin_SitemapController extends Zend_Controller_Action
                     ->gotoRoute(array(
                         'controller' => 'admin_sitemap',
                             'action' => 'index',
-                            'id' => $sitemapPage['parent_id']
+                            'id' => $parentId
                                 ), 'default', true);
         } catch (Application_Model_Exception_InvalidInput $ex) {
 
@@ -462,8 +464,74 @@ class Admin_SitemapController extends Zend_Controller_Action
                     ->gotoRoute(array(
                         'controller' => 'admin_sitemap',
                             'action' => 'index',
-                            'id' => $sitemapPage['parent_id']
+                            'id' => $parentId
                                 ), 'default', true);
+        }
+    }
+    
+    
+    public function deleteAction() {
+
+        $request = $this->getRequest();
+
+        if (!$request->isPost() || $request->isPost('task') != 'delete') {
+            //request is not post redirect to index page
+            //redirect to same or another page
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
+        }
+
+        $flashMessenger = $this->getHelper('FlashMessenger');
+
+        try {
+            //(int) sve sto nije integer pretvara u nulu :)
+            //read $_POST['id']
+            $id = (int) $request->getPost('id');
+
+            if ($id <= 0) {
+
+
+                //prekida se izvrsavanje programa i prikazuje se "Page not found"
+                throw new Zend_Controller_Router_Exception('Invalid sitemapPage id: ' . $id);
+            }
+
+            $cmsSitemapPagesTable = new Application_Model_DbTable_CmsSitemapPages();
+
+            $sitemapPage = $cmsSitemapPagesTable->getSitemapPageById($id);
+
+
+            if (empty($sitemapPage)) {
+
+                throw new Zend_Controller_Router_Exception('No sitemap page is found with id: ' . $id, 'errors');
+            }
+
+            $cmsSitemapPagesTable->deleteSitemapPage($id);
+
+
+            $flashMessenger->addMessage('Sitemap page '  . $sitemapPage['short_title'] .  ' ' . 'has been deleted', 'success');
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemap',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                        'id' => $sitemapPage['parent_id']
+                            ), 'default', true);
+        } catch (Application_Model_Exception_InvalidInput $ex) {
+            $flashMessenger->addMessage($ex->getMessage(), 'errors');
+
+            $redirector = $this->getHelper('Redirector');
+            $redirector->setExit(true)
+                    ->gotoRoute(array(
+                        'controller' => 'admin_sitemapPages',
+                        //ako se ne stavi action onda se podrazumeva index, ovo je stavljeno radi jasnoce :)
+                        'action' => 'index',
+                            ), 'default', true);
         }
     }
         
