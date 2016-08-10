@@ -224,7 +224,9 @@ $form->setElementDecorators(array('ViewHelper'));
 		</div>
 	</div>
 </div>
-
+<?php
+$this->inlineScript()->appendFile($this->baseUrl('admin/bower_components/ckeditor/ckeditor.js'));
+?>
 <script>
 <?php $this->inlineScript()->captureStart(); ?>    
     
@@ -261,6 +263,25 @@ $form->setElementDecorators(array('ViewHelper'));
         }
         
     })
+    
+    CKEDITOR.replace('body', {
+        'contentsCss': [
+            //redom se navode css-ovi iz layout.php koje zelimo da primenimo
+            '<?php echo $this->baseUrl('/plugins/bootstrap/dist/css/bootstrap.min.css');?>',
+            '<?php echo $this->baseUrl('/plugins/font-awesome/css/font-awesome.min.css');?>',
+            '<?php echo $this->baseUrl('/css/theme-style.css');?>',
+            '<?php echo $this->baseUrl('/css/custom-style.css');?>',
+            '<?php echo $this->baseUrl('/css/colour-blue.css');?>',
+            //font koji koristimo je na google serveru
+            'https://fonts.googleapis.com/css?family=Monda:400,700'
+        ],
+        //omogucava tagove u ck edotiru
+        allowedContent: true,
+        height: 600,
+        bodyClass: 'block',
+        filebrowserBrowseUrl: '<?php echo $this->url(array('controller' => 'admin_filemanager', 'action' => 'popup'), 'default', true);?>'
+    });
+    
     
     
 <?php $this->inlineScript()->captureEnd(); ?>    
