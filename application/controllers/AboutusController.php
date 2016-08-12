@@ -10,6 +10,7 @@ class AboutusController extends Zend_Controller_Action
 
     public function indexAction()
     {
+        $request = $this->getRequest();
         $cmsMembersDbTable = new Application_Model_DbTable_CmsMembers();
         
         //select je objekat klase Zend_Db_Select
@@ -21,7 +22,7 @@ class AboutusController extends Zend_Controller_Action
         //debug za  db select - vraca se sql upit
         //die($select->assemble());
         
-        $request = $this->getRequest();
+        
         
         $sitemapPageId = (int) $request->getParam('sitemap_page_id');
         
@@ -48,12 +49,10 @@ class AboutusController extends Zend_Controller_Action
             throw new Zend_Controller_Router_Exception('No sitemap page is disabled: ' . $id, 404);
         }
         
-        $this->view->sitemapPage = $sitemapPage;
-        
         
         
         $members = $cmsMembersDbTable->fetchAll($select);
-        
+        $this->view->sitemapPage = $sitemapPage;
         $this->view->members = $members;
     }
 
