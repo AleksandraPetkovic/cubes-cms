@@ -49,6 +49,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
             'ContactPage' => 1
         );
         
+        //klasa koja implementira singleton pattern
         Zend_Registry::set('sitemapPageTypes', $sitemapPageTypes);
         Zend_Registry::set('rootSitemapPageTypes', $rootSitemapPageTypes);
         

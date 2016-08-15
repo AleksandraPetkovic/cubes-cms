@@ -1,0 +1,24 @@
+<div class="form-group">
+                            <label class="col-md-4 control-label" for="fieldName">fieldName</label>  
+                            <div class="col-md-4">
+                                <?php
+                                echo $form->getElement('fieldName')->setAttribs(array(
+                                    'class' => 'form-control input-md',
+                                    'placeholder' => "", 
+                                    'id' => "fieldName",
+                                    'required' => 'required'
+                                ));
+                                ?>
+                                <span class="help-block"></span>  
+                            </div>
+                            <div class="col-md-4">
+                                <?php if ($form->getElement('fieldName')->hasErrors()) { ?>
+                                    <div class="has-error">
+                                        <?php foreach ($form->getElement('fieldName')->getMessages() as $message) { ?>
+                                            <p class="help-block"><?php echo $this->escape($message); ?></p>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
+
+                            </div>
+                        </div>
