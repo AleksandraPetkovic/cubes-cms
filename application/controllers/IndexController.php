@@ -10,14 +10,32 @@ class IndexController extends Zend_Controller_Action
 
     public function indexAction()
     {
-        $cmsClientsDbTable = new Application_Model_DbTable_CmsClients();
-       
-        $select = $cmsClientsDbTable->select();
-        $select->where('status = ?', Application_Model_DbTable_CmsClients::STATUS_ENABLED)
-                ->order('order_number');
+        $cmsIndexSlidesDbTable = new Application_Model_DbTable_CmsIndexSlides();
+		
+		$indexSlides = $cmsIndexSlidesDbTable->search(array(
+			'filters' => array(
+				'status' => Application_Model_DbTable_CmsIndexSlides::STATUS_ENABLED
+			),
+			'orders' => array(
+				'order_number' => 'ASC'
+			)
+		));
+		
                 
-        $clients = $cmsClientsDbTable->fetchAll($select);
-        $this->view->clients = $clients;
+        $cmsServicesDbTable = new Application_Model_DbTable_CmsServices();
+		
+		$services = $cmsServicesDbTable->search(array(
+			'filters' => array(
+				'status' => Application_Model_DbTable_CmsServices::STATUS_ENABLED
+			),
+			'orders' => array(
+				'order_number' => 'ASC'
+			),
+			'limit' => 4
+		));
+		
+		$this->view->indexSlides = $indexSlides;        
+		$this->view->services = $services;
     }
 
 
