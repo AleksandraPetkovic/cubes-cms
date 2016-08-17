@@ -42,7 +42,7 @@ $this->headTitle('Services');
         <div class="block services margin-top-large">
             <h2 class="block-title">
                 <span>Our Services</span> 
-                <small><a href="<?php echo $this->url(array('controller' => 'services', 'action' => 'index'), 'default', true);?>">View all</a></small>
+                <small><a href="<?php echo $this->sitemapPageUrl($this->servicesSitemapPage['id']);?>">View all</a></small>
             </h2>
             <ul class="thumbnails row">
                 <?php foreach ($this->services as $service) { ?>
