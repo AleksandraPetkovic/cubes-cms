@@ -13,6 +13,21 @@ class Admin_MembersController extends Zend_Controller_Action {
 
         //prikaz svih member-a
         $cmsMembersDbTable = new Application_Model_DbTable_CmsMembers();
+        
+        
+        
+        $cache = Zend_Registry::get('mycache');
+        $members = $cache->load('members');
+        
+        if(!$members) {
+            $members = $cmsMembersDbTable->search(array(
+            'orders' => array(
+                'order_number' => 'ASC'
+            )
+        ));
+           $cache->save($members, 'members'); 
+            
+        }
 
 //        $members = $cmsMembersDbTable->search(array(
 //            'filters' => array(
@@ -30,11 +45,8 @@ class Admin_MembersController extends Zend_Controller_Action {
 //            //'page' => 2
 //        ));
         
-        $members = $cmsMembersDbTable->search(array(
-            'orders' => array(
-                'order_number' => 'ASC'
-            )
-        ));
+        
+        
             
 
         $this->view->members = $members;
